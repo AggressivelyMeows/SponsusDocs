@@ -277,26 +277,18 @@ definitions:
         - number
 tags:
   - name: authentication
-  - name: pay
   - name: profile
   - name: oauth
   - name: posts
   - name: files
-  - name: webhooks
   - name: events
   - name: search
-  - name: seo
   - name: integrations
-  - name: admin
   - name: feed
-  - name: comm
   - name: chat
   - name: perm
   - name: comments
-  - name: emoji
   - name: notifications
-  - name: redash
-  - name: dev
 paths:
   /v1/auth/@me:
     post:
