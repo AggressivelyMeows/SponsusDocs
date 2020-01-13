@@ -2521,18 +2521,6 @@ paths:
       parameters: []
       responses:
         '200': {}
-  /v1/notifications/test:
-    get:
-      operationId: notifications.test
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - notifications
-      parameters: []
-      responses:
-        '200': {}
 host: api.sponsus.org
 produces:
   - application/json
