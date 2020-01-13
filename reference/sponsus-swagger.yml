@@ -7,13 +7,12 @@ info:
     email: developers@sponsus.org
     name: Sponsus
   license:
-    url: 'https://sponsus.org/terms'
-    name: Licence
+    url: 'about:blank'
+    name: Empty
 schemes:
   - https
 securityDefinitions:
   Authentication:
-    name: API Key
     type: apiKey
     in: header
     description: |-
@@ -184,6 +183,98 @@ definitions:
         code: KEY_INVALID
         missing_permission: payments.tiers.read
     description: This is where the API cannot fulfil the request due to the API key not having the correct permissions.
+  Sponsorship:
+    title: Sponsorship
+    type: object
+    properties:
+      tier:
+        $ref: '#/definitions/Tier'
+      price:
+        type: number
+      owner:
+        $ref: '#/definitions/Profile'
+      is_active:
+        type: boolean
+      is_custom:
+        type: boolean
+      charge_amount:
+        type: number
+  IncomingSponsorship:
+    title: IncomingSponsorship
+    type: object
+    description: Slightly different to the standard sponsorship object. Needs more information and doesnt need to provide creator context (since the person calling the route is the creator)
+    properties:
+      userID:
+        type: string
+      created_at:
+        type: number
+      is_active:
+        type: boolean
+      targetID:
+        type: string
+      tier:
+        $ref: '#/definitions/Tier'
+      has_paid:
+        type: boolean
+      current_month:
+        type: string
+      is_custom:
+        type: boolean
+      active_total:
+        type: number
+      active_sponsorship_total:
+        type: number
+    required:
+      - userID
+      - created_at
+      - is_active
+      - targetID
+      - has_paid
+      - current_month
+  Charge:
+    title: Charge
+    type: object
+    properties:
+      _id:
+        type: string
+      amount:
+        type: string
+      destination:
+        $ref: '#/definitions/BasicUser'
+      created_at:
+        type: string
+      avalible_at:
+        type: string
+      user:
+        $ref: '#/definitions/BasicUser'
+      type:
+        type: string
+      avalible_percent:
+        type: string
+      created_at_stamp:
+        type: string
+    required:
+      - _id
+      - amount
+      - created_at
+      - avalible_at
+    description: ''
+  BasicUser:
+    title: BasicUser
+    type: object
+    properties:
+      _id:
+        type: string
+      username:
+        type: string
+    description: This is a shortform User object
+  PostTag:
+    title: PostTag
+    type: array
+    items:
+      type:
+        - string
+        - number
 tags:
   - name: authentication
   - name: pay
@@ -244,9 +335,10 @@ paths:
             $ref: '#/definitions/APIError'
       security:
         - Authentication: []
+      summary: Update user account
   /v1/payments/@me/statistics:
     get:
-      operationId: pay.payment_stats
+      operationId: payments.payment_stats
       consumes:
         - application/json
       produces:
@@ -289,9 +381,10 @@ paths:
         - Authentication: []
       tags:
         - payments
+      summary: Get payment stats
   '/v1/payments/{userID}/tiers':
     get:
-      operationId: pay.get_user_tiers
+      operationId: payments.get_user_tiers
       consumes:
         - application/json
       produces:
@@ -340,9 +433,10 @@ paths:
       description: 'Gets the creators tiers for display on the front end. If you want to edit tiers, use /payments/@me/tiers.'
       tags:
         - payments
+      summary: Get creators tiers
   '/v1/payments/{userID}/tiers/{tierID}':
     get:
-      operationId: pay.get_tier.get
+      operationId: payments.get_tier.get
       consumes:
         - application/json
       produces:
@@ -373,9 +467,10 @@ paths:
       description: ''
       tags:
         - payments
+      summary: Get a single tier
   '/v1/payments/{userID}/tiers/{tierID}/remaining_slots':
     get:
-      operationId: pay.get_tier
+      operationId: payments.get_tier
       consumes:
         - application/json
       produces:
@@ -414,9 +509,11 @@ paths:
             $ref: '#/definitions/APIError'
       tags:
         - payments
+      summary: Get a tiers remaining open slots
+      description: Tells you how many slots are open for sponsorships. Used in the UI to show how many are left.
   /v1/payments/@me/tiers:
     get:
-      operationId: pay.manage_tiers.get
+      operationId: payments.manage_tiers.get
       consumes:
         - application/json
       produces:
@@ -460,15 +557,97 @@ paths:
       description: Requires payments.tiers.read
       security:
         - Authentication: []
+      summary: Get all tiers
     post:
-      operationId: pay.manage_tiers.post
+      operationId: payments.manage_tiers.post
       consumes:
         - application/json
       produces:
         - application/json
       tags:
         - pay
-      parameters: []
+      parameters:
+        - in: body
+          name: body
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+                minLength: 1
+                maxLength: 50
+              description:
+                type: string
+                maxLength: 25000
+              price:
+                type: number
+                minimum: 1
+                maximum: 500
+              advanced:
+                type: object
+                properties:
+                  discord_role:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                  limit:
+                    type: object
+                    properties:
+                      enabled:
+                        type: boolean
+                      max:
+                        type: number
+            required:
+              - title
+              - description
+              - price
+          x-examples:
+            Example:
+              title: New tier
+              description: 'This is some markdown text :sparkles:'
+              price: 10
+              advanced:
+                discord_role:
+                  id: '595004584506687489'
+                  name: Ceru
+                limit:
+                  enabled: true
+                  max: 1
+        - in: body
+          name: body
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+              description:
+                type: string
+              price:
+                type: number
+              advanced:
+                type: object
+                properties:
+                  discord_role:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                  limit:
+                    type: object
+                    properties:
+                      enabled:
+                        type: boolean
+                      max:
+                        type: number
+              '':
+                type: string
+          x-examples:
+            example-1: {}
       responses:
         '201':
           description: Created
@@ -484,9 +663,12 @@ paths:
           schema:
             $ref: '#/definitions/APIKeyNoPermissions'
       description: Requires payments.tiers.write
+      security:
+        - Authentication: []
+      summary: Create a new tier
   '/v1/payments/@me/tiers/{tierID}':
     delete:
-      operationId: pay.manage_tier.delete
+      operationId: payments.manage_tier.delete
       consumes:
         - application/json
       produces:
@@ -501,7 +683,7 @@ paths:
       responses:
         '200': {}
     post:
-      operationId: pay.manage_tier.post
+      operationId: payments.manage_tier.post
       consumes:
         - application/json
       produces:
@@ -511,25 +693,106 @@ paths:
           required: true
           in: path
           name: tierID
+        - in: body
+          name: body
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+              description:
+                type: string
+              advanced:
+                type: object
+                properties:
+                  discord_role:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                  limit:
+                    type: object
+                    properties:
+                      enabled:
+                        type: boolean
+                      max:
+                        type: number
+          x-examples:
+            Example:
+              title: This title should be changed
+              price: 1
+              description: New description
+              userID: '1729788214794915840'
+              advanced:
+                limit:
+                  enabled: false
+                  max: 0
+              created_at: 1557014705.521609
+              is_active: true
+          description: All fields are optional but you must send at least 1 field.
+        - in: body
+          name: body
+          schema:
+            type: object
+            properties: {}
+          x-examples:
+            example-1: {}
       responses:
-        '200': {}
+        '200':
+          description: Update successful
+          schema:
+            $ref: '#/definitions/APIBasicSuccess'
+          examples:
+            Example: {}
+        '401':
+          description: You do not have permission to write to payments.tiers
+          schema:
+            $ref: '#/definitions/APIKeyNoPermissions'
+        '403':
+          description: You do not have write access to this tier.
+          schema:
+            $ref: '#/definitions/APIError'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/APIError'
       tags:
         - payments
+      summary: Update a tier
+      security:
+        - Authentication: []
+      description: Requires payments.tiers.write
   /v1/payments/@me/supporting:
     get:
-      operationId: pay.get_user_supporting
+      operationId: payments.get_user_supporting
       consumes:
         - application/json
       produces:
         - application/json
       parameters: []
       responses:
-        '200': {}
+        '200':
+          schema:
+            type: object
+            properties:
+              success:
+                type: string
+              supporting:
+                type: array
+                items:
+                  $ref: '#/definitions/Sponsorship'
+          description: ''
       tags:
         - payments
+      summary: Get all creators this user is sponsoring
+      description: Requires payments.sponsoring.read
+      security:
+        - Authentication: []
   '/v1/payments/{userID}/sponsoring':
     get:
-      operationId: pay.get_user_sponsoring_status
+      operationId: payments.get_user_sponsoring_status
       consumes:
         - application/json
       produces:
@@ -540,12 +803,43 @@ paths:
           in: path
           name: userID
       responses:
-        '200': {}
+        '200':
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              sponsorship:
+                $ref: '#/definitions/IncomingSponsorship'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/APIError'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/APIKeyNoPermissions'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/APIError'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/APIError'
       tags:
         - payments
+      description: |-
+        Gets an IncomingSponsorship object if the target user is sponsoring you.
+
+        Requires payments.sponsorships.read
+        **(Sponsorships and sponsoring are two different permissions!!)**
+      security:
+        - Authentication: []
+      summary: Get sponsorship status of a user
   '/v1/payments/{userID}/donations/settings':
     get:
-      operationId: pay.set_donation_settings.get
+      operationId: payments.set_donation_settings
       consumes:
         - application/json
       produces:
@@ -556,36 +850,61 @@ paths:
           in: path
           name: userID
       responses:
-        '200': {}
+        '200':
+          examples:
+            Example:
+              success: true
+              enabled: true
+              length: 1month
+              limit: Thu 13/02/2020
+              social_media_image: 'https://cdn.ceru.tech/sponsus/1729788214794915840/1736565642238234624.png'
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              enabled:
+                type: boolean
+              length:
+                type: string
+              limit:
+                type: string
+              social_media_image:
+                type: string
+          description: ''
+        '404':
+          description: User does not exist
+          schema:
+            $ref: '#/definitions/APIError'
       tags:
         - payments
-    post:
-      operationId: pay.set_donation_settings.post
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - pay
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: userID
-      responses:
-        '200': {}
+      summary: Get a creators donation settings
   /v1/payments/@me/charges:
     get:
-      operationId: pay.get_charges
+      operationId: payments.get_charges
       consumes:
         - application/json
       produces:
         - application/json
       parameters: []
       responses:
-        '200': {}
+        '200':
+          schema:
+            type: object
+            properties:
+              success:
+                type: string
+              charges:
+                type: array
+                items:
+                  $ref: '#/definitions/Charge'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/APIKeyNoPermissions'
       tags:
         - payments
+      description: Requires payments.charges.read
   '/v1/profiles/{userID}/per_month':
     get:
       operationId: profile.calc_per_month.get
@@ -601,7 +920,26 @@ paths:
           in: path
           name: userID
       responses:
-        '200': {}
+        '200':
+          examples:
+            Example:
+              success: true
+              total: 10
+              sponsors: 2
+          schema:
+            type: object
+            properties:
+              success:
+                type: string
+              sponsors:
+                type: number
+                description: How many sponsorships does this creator have
+              total:
+                type: number
+                description: 'How much, in $, does this creator get'
+            required:
+              - success
+      summary: Get
     post:
       operationId: profile.calc_per_month.post
       consumes:
@@ -632,7 +970,19 @@ paths:
           in: path
           name: userID
       responses:
-        '200': {}
+        '200':
+          schema:
+            type: object
+            properties:
+              success:
+                type: string
+              tags:
+                type: array
+                items:
+                  $ref: '#/definitions/PostTag'
+          examples:
+            Example: {}
+      summary: Get a creators post tags
   '/v1/profiles/{userID}/post_total':
     get:
       operationId: profile.get_post_total
