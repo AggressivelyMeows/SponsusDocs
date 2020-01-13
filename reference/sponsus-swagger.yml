@@ -14,6 +14,7 @@ schemes:
 securityDefinitions:
   Authentication:
     type: apiKey
+    name: idk
     in: header
     description: |-
       This is the header that allows you to login as a user. Please only use API keys for this. Your account will be disabled if you use your login token for API access.
@@ -188,11 +189,108 @@ definitions:
     type: object
     properties:
       tier:
-        $ref: '#/definitions/Tier'
+        title: Tier
+        type: object
+        x-examples:
+          example-1:
+            _id: '1732814647763013632'
+            title: 'Sponsor Sponsus!'
+            price: 5
+            description: 'Demo tier. This can contain **markdown!**'
+            userID: '1729788214794915840'
+            advanced:
+              limit:
+                enabled: true
+                max: 6
+              discord_role:
+                name: Writing Team
+                id: '622152828831662096'
+            created_at: 1556109420.166289
+        description: A tier for a creator.
+        properties:
+          _id:
+            type: string
+          title:
+            type: string
+          price:
+            type: number
+          description:
+            type: string
+          userID:
+            type: string
+          advanced:
+            type: object
+            properties:
+              limit:
+                type: object
+                properties:
+                  enalbed:
+                    type: boolean
+                  max:
+                    type: number
+              discord_role:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  id:
+                    type: string
+              '':
+                type: string
+          created_at:
+            type: number
+          support:
+            type: object
+            properties:
+              is_supporting:
+                type: boolean
+        required:
+          - _id
+          - title
+          - price
+          - description
+          - userID
       price:
         type: number
       owner:
-        $ref: '#/definitions/Profile'
+        title: Profile
+        type: object
+        x-examples:
+          Profile:
+            description: 'awoo!'
+            about: 'Hi, im Cerulean and im making a new API system that will allow developers to create much more indepth integrations!'
+            status: public
+            theme: '#0a62ac'
+            tags: []
+            is_nsfw: false
+            cards: []
+            nickname: 'Nickname testing thing!'
+            username: Cerulean
+            _id: '1729788214794915840'
+        description: A profile object used to describe a creator.
+        properties:
+          _id:
+            type: string
+          about:
+            type: string
+          status:
+            type: string
+          theme:
+            type: string
+          tags:
+            type: array
+            items:
+              type: string
+          is_nsfw:
+            type: string
+          cards:
+            type: array
+            items:
+              $ref: ''
+          nickname:
+            type: string
+          username:
+            type: string
       is_active:
         type: boolean
       is_custom:
@@ -213,7 +311,67 @@ definitions:
       targetID:
         type: string
       tier:
-        $ref: '#/definitions/Tier'
+        title: Tier
+        type: object
+        x-examples:
+          example-1:
+            _id: '1732814647763013632'
+            title: 'Sponsor Sponsus!'
+            price: 5
+            description: 'Demo tier. This can contain **markdown!**'
+            userID: '1729788214794915840'
+            advanced:
+              limit:
+                enabled: true
+                max: 6
+              discord_role:
+                name: Writing Team
+                id: '622152828831662096'
+            created_at: 1556109420.166289
+        description: A tier for a creator.
+        properties:
+          _id:
+            type: string
+          title:
+            type: string
+          price:
+            type: number
+          description:
+            type: string
+          userID:
+            type: string
+          advanced:
+            type: object
+            properties:
+              limit:
+                type: object
+                properties:
+                  enalbed:
+                    type: boolean
+                  max:
+                    type: number
+              discord_role:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  id:
+                    type: string
+              '':
+                type: string
+          created_at:
+            type: number
+          support:
+            type: object
+            properties:
+              is_supporting:
+                type: boolean
+        required:
+          - _id
+          - title
+          - price
+          - description
+          - userID
       has_paid:
         type: boolean
       current_month:
@@ -240,13 +398,27 @@ definitions:
       amount:
         type: string
       destination:
-        $ref: '#/definitions/BasicUser'
+        title: BasicUser
+        type: object
+        properties:
+          _id:
+            type: string
+          username:
+            type: string
+        description: This is a shortform User object
       created_at:
         type: string
       avalible_at:
         type: string
       user:
-        $ref: '#/definitions/BasicUser'
+        title: BasicUser
+        type: object
+        properties:
+          _id:
+            type: string
+          username:
+            type: string
+        description: This is a shortform User object
       type:
         type: string
       avalible_percent:
@@ -277,18 +449,26 @@ definitions:
         - number
 tags:
   - name: authentication
+  - name: pay
   - name: profile
   - name: oauth
   - name: posts
   - name: files
+  - name: webhooks
   - name: events
   - name: search
+  - name: seo
   - name: integrations
+  - name: admin
   - name: feed
+  - name: comm
   - name: chat
   - name: perm
   - name: comments
+  - name: emoji
   - name: notifications
+  - name: redash
+  - name: dev
 paths:
   /v1/auth/@me:
     post:
@@ -314,17 +494,50 @@ paths:
         '200':
           description: ''
           schema:
-            $ref: '#/definitions/APIBasicSuccess'
+            title: APIBasicSuccess
+            type: object
+            properties:
+              success:
+                type: boolean
+            x-examples:
+              'Its just an object with success, nothing fancy':
+                success: true
           examples:
             example-1: {}
         '400':
           description: Bad Request
           schema:
-            $ref: '#/definitions/APIError'
+            title: APIError
+            type: object
+            properties:
+              success:
+                type: boolean
+              error:
+                type: string
+              code:
+                type: string
+            x-examples:
+              AuthError:
+                success: false
+                error: Authentication token is invalid or not present
+                status: 403
         '403':
           description: Forbidden
           schema:
-            $ref: '#/definitions/APIError'
+            title: APIError
+            type: object
+            properties:
+              success:
+                type: boolean
+              error:
+                type: string
+              code:
+                type: string
+            x-examples:
+              AuthError:
+                success: false
+                error: Authentication token is invalid or not present
+                status: 403
       security:
         - Authentication: []
       summary: Update user account
@@ -367,7 +580,20 @@ paths:
         '403':
           description: Forbidden
           schema:
-            $ref: '#/definitions/APIError'
+            title: APIError
+            type: object
+            properties:
+              success:
+                type: boolean
+              error:
+                type: string
+              code:
+                type: string
+            x-examples:
+              AuthError:
+                success: false
+                error: Authentication token is invalid or not present
+                status: 403
       description: Get the monthly stats for the user.
       security:
         - Authentication: []
@@ -398,7 +624,67 @@ paths:
               tiers:
                 type: array
                 items:
-                  $ref: '#/definitions/Tier'
+                  title: Tier
+                  type: object
+                  x-examples:
+                    example-1:
+                      _id: '1732814647763013632'
+                      title: 'Sponsor Sponsus!'
+                      price: 5
+                      description: 'Demo tier. This can contain **markdown!**'
+                      userID: '1729788214794915840'
+                      advanced:
+                        limit:
+                          enabled: true
+                          max: 6
+                        discord_role:
+                          name: Writing Team
+                          id: '622152828831662096'
+                      created_at: 1556109420.166289
+                  description: A tier for a creator.
+                  properties:
+                    _id:
+                      type: string
+                    title:
+                      type: string
+                    price:
+                      type: number
+                    description:
+                      type: string
+                    userID:
+                      type: string
+                    advanced:
+                      type: object
+                      properties:
+                        limit:
+                          type: object
+                          properties:
+                            enalbed:
+                              type: boolean
+                            max:
+                              type: number
+                        discord_role:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            id:
+                              type: string
+                        '':
+                          type: string
+                    created_at:
+                      type: number
+                    support:
+                      type: object
+                      properties:
+                        is_supporting:
+                          type: boolean
+                  required:
+                    - _id
+                    - title
+                    - price
+                    - description
+                    - userID
           description: ''
           examples:
             Example:
@@ -450,12 +736,85 @@ paths:
               success:
                 type: string
               tier:
-                $ref: '#/definitions/Tier'
+                title: Tier
+                type: object
+                x-examples:
+                  example-1:
+                    _id: '1732814647763013632'
+                    title: 'Sponsor Sponsus!'
+                    price: 5
+                    description: 'Demo tier. This can contain **markdown!**'
+                    userID: '1729788214794915840'
+                    advanced:
+                      limit:
+                        enabled: true
+                        max: 6
+                      discord_role:
+                        name: Writing Team
+                        id: '622152828831662096'
+                    created_at: 1556109420.166289
+                description: A tier for a creator.
+                properties:
+                  _id:
+                    type: string
+                  title:
+                    type: string
+                  price:
+                    type: number
+                  description:
+                    type: string
+                  userID:
+                    type: string
+                  advanced:
+                    type: object
+                    properties:
+                      limit:
+                        type: object
+                        properties:
+                          enalbed:
+                            type: boolean
+                          max:
+                            type: number
+                      discord_role:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          id:
+                            type: string
+                      '':
+                        type: string
+                  created_at:
+                    type: number
+                  support:
+                    type: object
+                    properties:
+                      is_supporting:
+                        type: boolean
+                required:
+                  - _id
+                  - title
+                  - price
+                  - description
+                  - userID
           description: ''
         '404':
           description: The requested tier does not exist
           schema:
-            $ref: '#/definitions/APIError'
+            title: APIError
+            type: object
+            properties:
+              success:
+                type: boolean
+              error:
+                type: string
+              code:
+                type: string
+            x-examples:
+              AuthError:
+                success: false
+                error: Authentication token is invalid or not present
+                status: 403
       description: ''
       tags:
         - payments
@@ -494,11 +853,37 @@ paths:
         '400':
           description: Tier is not limited
           schema:
-            $ref: '#/definitions/APIError'
+            title: APIError
+            type: object
+            properties:
+              success:
+                type: boolean
+              error:
+                type: string
+              code:
+                type: string
+            x-examples:
+              AuthError:
+                success: false
+                error: Authentication token is invalid or not present
+                status: 403
         '404':
           description: Tier was not found
           schema:
-            $ref: '#/definitions/APIError'
+            title: APIError
+            type: object
+            properties:
+              success:
+                type: boolean
+              error:
+                type: string
+              code:
+                type: string
+            x-examples:
+              AuthError:
+                success: false
+                error: Authentication token is invalid or not present
+                status: 403
       tags:
         - payments
       summary: Get a tiers remaining open slots
@@ -521,7 +906,67 @@ paths:
               tiers:
                 type: array
                 items:
-                  $ref: '#/definitions/Tier'
+                  title: Tier
+                  type: object
+                  x-examples:
+                    example-1:
+                      _id: '1732814647763013632'
+                      title: 'Sponsor Sponsus!'
+                      price: 5
+                      description: 'Demo tier. This can contain **markdown!**'
+                      userID: '1729788214794915840'
+                      advanced:
+                        limit:
+                          enabled: true
+                          max: 6
+                        discord_role:
+                          name: Writing Team
+                          id: '622152828831662096'
+                      created_at: 1556109420.166289
+                  description: A tier for a creator.
+                  properties:
+                    _id:
+                      type: string
+                    title:
+                      type: string
+                    price:
+                      type: number
+                    description:
+                      type: string
+                    userID:
+                      type: string
+                    advanced:
+                      type: object
+                      properties:
+                        limit:
+                          type: object
+                          properties:
+                            enalbed:
+                              type: boolean
+                            max:
+                              type: number
+                        discord_role:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            id:
+                              type: string
+                        '':
+                          type: string
+                    created_at:
+                      type: number
+                    support:
+                      type: object
+                      properties:
+                        is_supporting:
+                          type: boolean
+                  required:
+                    - _id
+                    - title
+                    - price
+                    - description
+                    - userID
           examples:
             Example:
               success: true
@@ -543,7 +988,24 @@ paths:
         '401':
           description: Unauthorized
           schema:
-            $ref: '#/definitions/APIKeyNoPermissions'
+            title: APIKeyNoPermissions
+            type: object
+            properties:
+              success:
+                type: string
+              error:
+                type: string
+              code:
+                type: string
+              missing_permission:
+                type: string
+            x-examples:
+              Example:
+                success: false
+                error: 'API key does not have permission to read to "payments.tiers"'
+                code: KEY_INVALID
+                missing_permission: payments.tiers.read
+            description: This is where the API cannot fulfil the request due to the API key not having the correct permissions.
       tags:
         - payments
       description: Requires payments.tiers.read
@@ -649,11 +1111,88 @@ paths:
               success:
                 type: boolean
               tier:
-                $ref: '#/definitions/Tier'
+                title: Tier
+                type: object
+                x-examples:
+                  example-1:
+                    _id: '1732814647763013632'
+                    title: 'Sponsor Sponsus!'
+                    price: 5
+                    description: 'Demo tier. This can contain **markdown!**'
+                    userID: '1729788214794915840'
+                    advanced:
+                      limit:
+                        enabled: true
+                        max: 6
+                      discord_role:
+                        name: Writing Team
+                        id: '622152828831662096'
+                    created_at: 1556109420.166289
+                description: A tier for a creator.
+                properties:
+                  _id:
+                    type: string
+                  title:
+                    type: string
+                  price:
+                    type: number
+                  description:
+                    type: string
+                  userID:
+                    type: string
+                  advanced:
+                    type: object
+                    properties:
+                      limit:
+                        type: object
+                        properties:
+                          enalbed:
+                            type: boolean
+                          max:
+                            type: number
+                      discord_role:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          id:
+                            type: string
+                      '':
+                        type: string
+                  created_at:
+                    type: number
+                  support:
+                    type: object
+                    properties:
+                      is_supporting:
+                        type: boolean
+                required:
+                  - _id
+                  - title
+                  - price
+                  - description
+                  - userID
         '401':
           description: Unauthorized
           schema:
-            $ref: '#/definitions/APIKeyNoPermissions'
+            title: APIKeyNoPermissions
+            type: object
+            properties:
+              success:
+                type: string
+              error:
+                type: string
+              code:
+                type: string
+              missing_permission:
+                type: string
+            x-examples:
+              Example:
+                success: false
+                error: 'API key does not have permission to read to "payments.tiers"'
+                code: KEY_INVALID
+                missing_permission: payments.tiers.read
+            description: This is where the API cannot fulfil the request due to the API key not having the correct permissions.
       description: Requires payments.tiers.write
       security:
         - Authentication: []
@@ -674,8 +1213,16 @@ paths:
           name: tierID
       responses:
         '200':
+          description: OK
           schema:
-            $ref: '#/definitions/APIBasicSuccess'
+            title: APIBasicSuccess
+            type: object
+            properties:
+              success:
+                type: boolean
+            x-examples:
+              'Its just an object with success, nothing fancy':
+                success: true
       summary: Delete a tier
       description: ''
     post:
@@ -739,21 +1286,71 @@ paths:
         '200':
           description: Update successful
           schema:
-            $ref: '#/definitions/APIBasicSuccess'
+            title: APIBasicSuccess
+            type: object
+            properties:
+              success:
+                type: boolean
+            x-examples:
+              'Its just an object with success, nothing fancy':
+                success: true
           examples:
             Example: {}
         '401':
           description: You do not have permission to write to payments.tiers
           schema:
-            $ref: '#/definitions/APIKeyNoPermissions'
+            title: APIKeyNoPermissions
+            type: object
+            properties:
+              success:
+                type: string
+              error:
+                type: string
+              code:
+                type: string
+              missing_permission:
+                type: string
+            x-examples:
+              Example:
+                success: false
+                error: 'API key does not have permission to read to "payments.tiers"'
+                code: KEY_INVALID
+                missing_permission: payments.tiers.read
+            description: This is where the API cannot fulfil the request due to the API key not having the correct permissions.
         '403':
           description: You do not have write access to this tier.
           schema:
-            $ref: '#/definitions/APIError'
+            title: APIError
+            type: object
+            properties:
+              success:
+                type: boolean
+              error:
+                type: string
+              code:
+                type: string
+            x-examples:
+              AuthError:
+                success: false
+                error: Authentication token is invalid or not present
+                status: 403
         '404':
           description: Not Found
           schema:
-            $ref: '#/definitions/APIError'
+            title: APIError
+            type: object
+            properties:
+              success:
+                type: boolean
+              error:
+                type: string
+              code:
+                type: string
+            x-examples:
+              AuthError:
+                success: false
+                error: Authentication token is invalid or not present
+                status: 403
       tags:
         - payments
       summary: Update a tier
@@ -778,7 +1375,118 @@ paths:
               supporting:
                 type: array
                 items:
-                  $ref: '#/definitions/Sponsorship'
+                  title: Sponsorship
+                  type: object
+                  properties:
+                    tier:
+                      title: Tier
+                      type: object
+                      x-examples:
+                        example-1:
+                          _id: '1732814647763013632'
+                          title: 'Sponsor Sponsus!'
+                          price: 5
+                          description: 'Demo tier. This can contain **markdown!**'
+                          userID: '1729788214794915840'
+                          advanced:
+                            limit:
+                              enabled: true
+                              max: 6
+                            discord_role:
+                              name: Writing Team
+                              id: '622152828831662096'
+                          created_at: 1556109420.166289
+                      description: A tier for a creator.
+                      properties:
+                        _id:
+                          type: string
+                        title:
+                          type: string
+                        price:
+                          type: number
+                        description:
+                          type: string
+                        userID:
+                          type: string
+                        advanced:
+                          type: object
+                          properties:
+                            limit:
+                              type: object
+                              properties:
+                                enalbed:
+                                  type: boolean
+                                max:
+                                  type: number
+                            discord_role:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                id:
+                                  type: string
+                            '':
+                              type: string
+                        created_at:
+                          type: number
+                        support:
+                          type: object
+                          properties:
+                            is_supporting:
+                              type: boolean
+                      required:
+                        - _id
+                        - title
+                        - price
+                        - description
+                        - userID
+                    price:
+                      type: number
+                    owner:
+                      title: Profile
+                      type: object
+                      x-examples:
+                        Profile:
+                          description: 'awoo!'
+                          about: 'Hi, im Cerulean and im making a new API system that will allow developers to create much more indepth integrations!'
+                          status: public
+                          theme: '#0a62ac'
+                          tags: []
+                          is_nsfw: false
+                          cards: []
+                          nickname: 'Nickname testing thing!'
+                          username: Cerulean
+                          _id: '1729788214794915840'
+                      description: A profile object used to describe a creator.
+                      properties:
+                        _id:
+                          type: string
+                        about:
+                          type: string
+                        status:
+                          type: string
+                        theme:
+                          type: string
+                        tags:
+                          type: array
+                          items:
+                            type: string
+                        is_nsfw:
+                          type: string
+                        cards:
+                          type: array
+                          items:
+                            $ref: ''
+                        nickname:
+                          type: string
+                        username:
+                          type: string
+                    is_active:
+                      type: boolean
+                    is_custom:
+                      type: boolean
+                    charge_amount:
+                      type: number
           description: ''
       tags:
         - payments
@@ -800,29 +1508,176 @@ paths:
           name: userID
       responses:
         '200':
+          description: OK
           schema:
             type: object
             properties:
               success:
                 type: boolean
               sponsorship:
-                $ref: '#/definitions/IncomingSponsorship'
+                title: IncomingSponsorship
+                type: object
+                description: Slightly different to the standard sponsorship object. Needs more information and doesnt need to provide creator context (since the person calling the route is the creator)
+                properties:
+                  userID:
+                    type: string
+                  created_at:
+                    type: number
+                  is_active:
+                    type: boolean
+                  targetID:
+                    type: string
+                  tier:
+                    title: Tier
+                    type: object
+                    x-examples:
+                      example-1:
+                        _id: '1732814647763013632'
+                        title: 'Sponsor Sponsus!'
+                        price: 5
+                        description: 'Demo tier. This can contain **markdown!**'
+                        userID: '1729788214794915840'
+                        advanced:
+                          limit:
+                            enabled: true
+                            max: 6
+                          discord_role:
+                            name: Writing Team
+                            id: '622152828831662096'
+                        created_at: 1556109420.166289
+                    description: A tier for a creator.
+                    properties:
+                      _id:
+                        type: string
+                      title:
+                        type: string
+                      price:
+                        type: number
+                      description:
+                        type: string
+                      userID:
+                        type: string
+                      advanced:
+                        type: object
+                        properties:
+                          limit:
+                            type: object
+                            properties:
+                              enalbed:
+                                type: boolean
+                              max:
+                                type: number
+                          discord_role:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                              id:
+                                type: string
+                          '':
+                            type: string
+                      created_at:
+                        type: number
+                      support:
+                        type: object
+                        properties:
+                          is_supporting:
+                            type: boolean
+                    required:
+                      - _id
+                      - title
+                      - price
+                      - description
+                      - userID
+                  has_paid:
+                    type: boolean
+                  current_month:
+                    type: string
+                  is_custom:
+                    type: boolean
+                  active_total:
+                    type: number
+                  active_sponsorship_total:
+                    type: number
+                required:
+                  - userID
+                  - created_at
+                  - is_active
+                  - targetID
+                  - has_paid
+                  - current_month
         '400':
           description: Bad Request
           schema:
-            $ref: '#/definitions/APIError'
+            title: APIError
+            type: object
+            properties:
+              success:
+                type: boolean
+              error:
+                type: string
+              code:
+                type: string
+            x-examples:
+              AuthError:
+                success: false
+                error: Authentication token is invalid or not present
+                status: 403
         '401':
           description: Unauthorized
           schema:
-            $ref: '#/definitions/APIKeyNoPermissions'
+            title: APIKeyNoPermissions
+            type: object
+            properties:
+              success:
+                type: string
+              error:
+                type: string
+              code:
+                type: string
+              missing_permission:
+                type: string
+            x-examples:
+              Example:
+                success: false
+                error: 'API key does not have permission to read to "payments.tiers"'
+                code: KEY_INVALID
+                missing_permission: payments.tiers.read
+            description: This is where the API cannot fulfil the request due to the API key not having the correct permissions.
         '403':
           description: Forbidden
           schema:
-            $ref: '#/definitions/APIError'
+            title: APIError
+            type: object
+            properties:
+              success:
+                type: boolean
+              error:
+                type: string
+              code:
+                type: string
+            x-examples:
+              AuthError:
+                success: false
+                error: Authentication token is invalid or not present
+                status: 403
         '404':
           description: Not Found
           schema:
-            $ref: '#/definitions/APIError'
+            title: APIError
+            type: object
+            properties:
+              success:
+                type: boolean
+              error:
+                type: string
+              code:
+                type: string
+            x-examples:
+              AuthError:
+                success: false
+                error: Authentication token is invalid or not present
+                status: 403
       tags:
         - payments
       description: |-
@@ -871,7 +1726,20 @@ paths:
         '404':
           description: User does not exist
           schema:
-            $ref: '#/definitions/APIError'
+            title: APIError
+            type: object
+            properties:
+              success:
+                type: boolean
+              error:
+                type: string
+              code:
+                type: string
+            x-examples:
+              AuthError:
+                success: false
+                error: Authentication token is invalid or not present
+                status: 403
       tags:
         - payments
       summary: Get a creators donation settings
@@ -885,6 +1753,7 @@ paths:
       parameters: []
       responses:
         '200':
+          description: OK
           schema:
             type: object
             properties:
@@ -893,11 +1762,68 @@ paths:
               charges:
                 type: array
                 items:
-                  $ref: '#/definitions/Charge'
+                  title: Charge
+                  type: object
+                  properties:
+                    _id:
+                      type: string
+                    amount:
+                      type: string
+                    destination:
+                      title: BasicUser
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                        username:
+                          type: string
+                      description: This is a shortform User object
+                    created_at:
+                      type: string
+                    avalible_at:
+                      type: string
+                    user:
+                      title: BasicUser
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                        username:
+                          type: string
+                      description: This is a shortform User object
+                    type:
+                      type: string
+                    avalible_percent:
+                      type: string
+                    created_at_stamp:
+                      type: string
+                  required:
+                    - _id
+                    - amount
+                    - created_at
+                    - avalible_at
+                  description: ''
         '401':
           description: Unauthorized
           schema:
-            $ref: '#/definitions/APIKeyNoPermissions'
+            title: APIKeyNoPermissions
+            type: object
+            properties:
+              success:
+                type: string
+              error:
+                type: string
+              code:
+                type: string
+              missing_permission:
+                type: string
+            x-examples:
+              Example:
+                success: false
+                error: 'API key does not have permission to read to "payments.tiers"'
+                code: KEY_INVALID
+                missing_permission: payments.tiers.read
+            description: This is where the API cannot fulfil the request due to the API key not having the correct permissions.
       tags:
         - payments
       description: Requires payments.charges.read
@@ -917,6 +1843,7 @@ paths:
           name: userID
       responses:
         '200':
+          description: OK
           examples:
             Example:
               success: true
@@ -950,7 +1877,8 @@ paths:
           in: path
           name: userID
       responses:
-        '200': {}
+        '200':
+          description: OK
   '/v1/profiles/{userID}/post_tags':
     get:
       operationId: profile.get_post_tags
@@ -967,6 +1895,7 @@ paths:
           name: userID
       responses:
         '200':
+          description: OK
           schema:
             type: object
             properties:
@@ -975,7 +1904,12 @@ paths:
               tags:
                 type: array
                 items:
-                  $ref: '#/definitions/PostTag'
+                  title: PostTag
+                  type: array
+                  items:
+                    type:
+                      - string
+                      - number
           examples:
             Example: {}
       summary: Get a creators post tags
@@ -995,6 +1929,7 @@ paths:
           name: userID
       responses:
         '200':
+          description: OK
           schema:
             type: object
             properties:
@@ -1016,17 +1951,72 @@ paths:
       parameters: []
       responses:
         '200':
+          description: OK
           schema:
             type: object
             properties:
               success:
                 type: string
               profile:
-                $ref: '#/definitions/Profile'
+                title: Profile
+                type: object
+                x-examples:
+                  Profile:
+                    description: 'awoo!'
+                    about: 'Hi, im Cerulean and im making a new API system that will allow developers to create much more indepth integrations!'
+                    status: public
+                    theme: '#0a62ac'
+                    tags: []
+                    is_nsfw: false
+                    cards: []
+                    nickname: 'Nickname testing thing!'
+                    username: Cerulean
+                    _id: '1729788214794915840'
+                description: A profile object used to describe a creator.
+                properties:
+                  _id:
+                    type: string
+                  about:
+                    type: string
+                  status:
+                    type: string
+                  theme:
+                    type: string
+                  tags:
+                    type: array
+                    items:
+                      type: string
+                  is_nsfw:
+                    type: string
+                  cards:
+                    type: array
+                    items:
+                      $ref: ''
+                  nickname:
+                    type: string
+                  username:
+                    type: string
         '401':
           description: Unauthorized
           schema:
-            $ref: '#/definitions/APIKeyNoPermissions'
+            title: APIKeyNoPermissions
+            type: object
+            properties:
+              success:
+                type: string
+              error:
+                type: string
+              code:
+                type: string
+              missing_permission:
+                type: string
+            x-examples:
+              Example:
+                success: false
+                error: 'API key does not have permission to read to "payments.tiers"'
+                code: KEY_INVALID
+                missing_permission: payments.tiers.read
+            description: This is where the API cannot fulfil the request due to the API key not having the correct permissions.
       summary: "Get the logged in user's profile"
       security:
         - Authentication: []
@@ -1058,7 +2048,23 @@ paths:
               is_nsfw:
                 type: boolean
               cards:
-                $ref: '#/definitions/ProfileCard'
+                title: ProfileCard
+                type: object
+                x-examples:
+                  card:
+                    title: AWOO
+                    content: AWEOO
+                    image: 'https://cdn.ceru.tech/sponsus/1729788214794915840/1818387122831364096.png'
+                    link: ''
+                properties:
+                  title:
+                    type: string
+                  content:
+                    type: string
+                  image:
+                    type: string
+                  link:
+                    type: string
               nickname:
                 type: string
           description: Updates based on the fields provided.
@@ -1086,7 +2092,23 @@ paths:
               is_nsfw:
                 type: boolean
               cards:
-                $ref: '#/definitions/ProfileCard'
+                title: ProfileCard
+                type: object
+                x-examples:
+                  card:
+                    title: AWOO
+                    content: AWEOO
+                    image: 'https://cdn.ceru.tech/sponsus/1729788214794915840/1818387122831364096.png'
+                    link: ''
+                properties:
+                  title:
+                    type: string
+                  content:
+                    type: string
+                  image:
+                    type: string
+                  link:
+                    type: string
               nickname:
                 type: string
           description: Updates based on the fields provided.
@@ -1112,7 +2134,23 @@ paths:
               is_nsfw:
                 type: boolean
               cards:
-                $ref: '#/definitions/ProfileCard'
+                title: ProfileCard
+                type: object
+                x-examples:
+                  card:
+                    title: AWOO
+                    content: AWEOO
+                    image: 'https://cdn.ceru.tech/sponsus/1729788214794915840/1818387122831364096.png'
+                    link: ''
+                properties:
+                  title:
+                    type: string
+                  content:
+                    type: string
+                  image:
+                    type: string
+                  link:
+                    type: string
               nickname:
                 type: string
           description: Updates based on the fields provided.
@@ -1120,13 +2158,38 @@ paths:
             example-1: {}
       responses:
         '200':
+          description: OK
           schema:
-            $ref: '#/definitions/APIBasicSuccess'
+            title: APIBasicSuccess
+            type: object
+            properties:
+              success:
+                type: boolean
+            x-examples:
+              'Its just an object with success, nothing fancy':
+                success: true
           examples: {}
         '401':
           description: Unauthorized
           schema:
-            $ref: '#/definitions/APIKeyNoPermissions'
+            title: APIKeyNoPermissions
+            type: object
+            properties:
+              success:
+                type: string
+              error:
+                type: string
+              code:
+                type: string
+              missing_permission:
+                type: string
+            x-examples:
+              Example:
+                success: false
+                error: 'API key does not have permission to read to "payments.tiers"'
+                code: KEY_INVALID
+                missing_permission: payments.tiers.read
+            description: This is where the API cannot fulfil the request due to the API key not having the correct permissions.
       summary: Update your profile
       description: Requires profile.profile.write
       security:
@@ -1147,13 +2210,51 @@ paths:
           name: userID
       responses:
         '200':
+          description: OK
           schema:
             type: object
             properties:
               success:
                 type: string
               profile:
-                $ref: '#/definitions/Profile'
+                title: Profile
+                type: object
+                x-examples:
+                  Profile:
+                    description: 'awoo!'
+                    about: 'Hi, im Cerulean and im making a new API system that will allow developers to create much more indepth integrations!'
+                    status: public
+                    theme: '#0a62ac'
+                    tags: []
+                    is_nsfw: false
+                    cards: []
+                    nickname: 'Nickname testing thing!'
+                    username: Cerulean
+                    _id: '1729788214794915840'
+                description: A profile object used to describe a creator.
+                properties:
+                  _id:
+                    type: string
+                  about:
+                    type: string
+                  status:
+                    type: string
+                  theme:
+                    type: string
+                  tags:
+                    type: array
+                    items:
+                      type: string
+                  is_nsfw:
+                    type: string
+                  cards:
+                    type: array
+                    items:
+                      $ref: ''
+                  nickname:
+                    type: string
+                  username:
+                    type: string
       description: ''
       summary: Get a creators profile
   '/v1/profiles/{userID}/avatar/info':
@@ -1172,6 +2273,7 @@ paths:
           name: userID
       responses:
         '200':
+          description: OK
           schema:
             type: object
             properties:
@@ -1203,6 +2305,7 @@ paths:
           name: key
       responses:
         '200':
+          description: OK
           schema:
             type: 'null'
           headers: {}
@@ -1226,7 +2329,8 @@ paths:
           in: path
           name: key
       responses:
-        '200': {}
+        '200':
+          description: OK
   '/v1/profiles/{userID}/avatar':
     get:
       operationId: profile.get_user_avatar.get
@@ -1243,6 +2347,7 @@ paths:
           name: userID
       responses:
         '200':
+          description: OK
           schema:
             type: 'null'
       description: 'Returns an image suitable for your device (WebP for those who support it, PNG for those who cant)'
@@ -1261,7 +2366,8 @@ paths:
           in: path
           name: userID
       responses:
-        '200': {}
+        '200':
+          description: OK
   '/v1/profiles/{userID}/background':
     get:
       operationId: profile.get_user_background
@@ -1277,7 +2383,8 @@ paths:
           in: path
           name: userID
       responses:
-        '200': {}
+        '200':
+          description: OK
       description: 'Returns an image suitable for your device (WebP for those who support it, PNG for those who cant)'
       summary: Get a users background
   /v1/profiles/@me/avatar/upload:
@@ -1296,12 +2403,37 @@ paths:
           description: The new avatar in file form
       responses:
         '200':
+          description: OK
           schema:
-            $ref: '#/definitions/APIBasicSuccess'
+            title: APIBasicSuccess
+            type: object
+            properties:
+              success:
+                type: boolean
+            x-examples:
+              'Its just an object with success, nothing fancy':
+                success: true
         '401':
           description: Unauthorized
           schema:
-            $ref: '#/definitions/APIKeyNoPermissions'
+            title: APIKeyNoPermissions
+            type: object
+            properties:
+              success:
+                type: string
+              error:
+                type: string
+              code:
+                type: string
+              missing_permission:
+                type: string
+            x-examples:
+              Example:
+                success: false
+                error: 'API key does not have permission to read to "payments.tiers"'
+                code: KEY_INVALID
+                missing_permission: payments.tiers.read
+            description: This is where the API cannot fulfil the request due to the API key not having the correct permissions.
       description: Requires profile.manage_images.write
       security:
         - Authentication: []
@@ -1317,1088 +2449,118 @@ paths:
         - profile
       parameters:
         - in: formData
+          name: file
           type: string
       responses:
         '200':
+          description: OK
           schema:
-            $ref: '#/definitions/APIBasicSuccess'
+            title: APIBasicSuccess
+            type: object
+            properties:
+              success:
+                type: boolean
+            x-examples:
+              'Its just an object with success, nothing fancy':
+                success: true
         '400':
           description: The was an error while uploading
           schema:
-            $ref: '#/definitions/APIError'
+            title: APIError
+            type: object
+            properties:
+              success:
+                type: boolean
+              error:
+                type: string
+              code:
+                type: string
+            x-examples:
+              AuthError:
+                success: false
+                error: Authentication token is invalid or not present
+                status: 403
         '401':
           description: Unauthorized
           schema:
-            $ref: '#/definitions/APIKeyNoPermissions'
+            title: APIKeyNoPermissions
+            type: object
+            properties:
+              success:
+                type: string
+              error:
+                type: string
+              code:
+                type: string
+              missing_permission:
+                type: string
+            x-examples:
+              Example:
+                success: false
+                error: 'API key does not have permission to read to "payments.tiers"'
+                code: KEY_INVALID
+                missing_permission: payments.tiers.read
+            description: This is where the API cannot fulfil the request due to the API key not having the correct permissions.
       description: Requires profile.manage_images.write
       security:
         - Authentication: []
       summary: "Update the user's background"
-  /v1/oauth/@me/profile:
+  /v1/notifications/@me/auth:
     get:
-      operationId: oauth.oauth_get_profile
+      operationId: notifications.set_user_key
       consumes:
         - application/json
       produces:
         - application/json
       tags:
-        - oauth
+        - notifications
       parameters: []
       responses:
-        '200': {}
-  '/v1/posts/@me/post/{postID}/secret_keys/{keyID}':
-    delete:
-      operationId: posts.delete_post_secret_keys
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - posts
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: postID
-        - type: string
-          required: true
-          in: path
-          name: keyID
-      responses:
-        '200': {}
-  '/v1/posts/@me/post/{postID}/secret_keys':
-    get:
-      operationId: posts.get_post_secret_keys.get
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - posts
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: postID
-      responses:
-        '200': {}
-    delete:
-      operationId: posts.get_post_secret_keys.delete
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - posts
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: postID
-      responses:
-        '200': {}
+        '200':
+          description: OK
+  '/v1/notifications/{notifID}/read':
     post:
-      operationId: posts.get_post_secret_keys.post
+      operationId: notifications.set_read
       consumes:
         - application/json
       produces:
         - application/json
       tags:
-        - posts
+        - notifications
       parameters:
         - type: string
           required: true
           in: path
-          name: postID
+          name: notifID
       responses:
-        '200': {}
-  '/v1/posts/{userID}/post/{postID}/publish':
-    post:
-      operationId: posts.publish_post
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - posts
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: userID
-        - type: string
-          required: true
-          in: path
-          name: postID
-      responses:
-        '200': {}
-  '/v1/posts/{userID}/post/{postID}':
+        '200':
+          description: OK
+  /v1/notifications/@me:
     get:
-      operationId: posts.get_post.get
+      operationId: notifications.get_notifications
       consumes:
         - application/json
       produces:
         - application/json
       tags:
-        - posts
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: userID
-        - type: string
-          required: true
-          in: path
-          name: postID
-      responses:
-        '200': {}
-    delete:
-      operationId: posts.get_post.delete
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - posts
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: userID
-        - type: string
-          required: true
-          in: path
-          name: postID
-      responses:
-        '200': {}
-    post:
-      operationId: posts.get_post.post
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - posts
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: userID
-        - type: string
-          required: true
-          in: path
-          name: postID
-      responses:
-        '200': {}
-  '/v1/posts/{userID}':
-    get:
-      operationId: posts.get_posts
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - posts
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: userID
-      responses:
-        '200': {}
-  /v1/posts/@me:
-    post:
-      operationId: posts.create_a_post
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - posts
+        - notifications
       parameters: []
       responses:
-        '200': {}
-  '/v1/posts/{creatorID}/{postID}/poll':
+        '200':
+          description: OK
+  /v1/notifications/@me/unread_count:
     get:
-      operationId: posts.poll_post
+      operationId: notifications.get_recent_notifs
       consumes:
         - application/json
       produces:
         - application/json
       tags:
-        - posts
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: creatorID
-        - type: string
-          required: true
-          in: path
-          name: postID
-      responses:
-        '200': {}
-  '/v1/posts/{creatorID}/{postID}/poll/verify':
-    get:
-      operationId: posts.verify_poll_results
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - posts
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: creatorID
-        - type: string
-          required: true
-          in: path
-          name: postID
-      responses:
-        '200': {}
-  '/v1/posts/{creatorID}/{postID}/poll/answer':
-    post:
-      operationId: posts.poll_post.post
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - posts
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: creatorID
-        - type: string
-          required: true
-          in: path
-          name: postID
-      responses:
-        '200': {}
-  '/v1/posts/{creatorID}/{postID}/poll/results':
-    get:
-      operationId: posts.get_poll_results
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - posts
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: creatorID
-        - type: string
-          required: true
-          in: path
-          name: postID
-      responses:
-        '200': {}
-  '/v1/posts/@me/{postID}/poll/close':
-    get:
-      operationId: posts.toggle_poll
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - posts
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: postID
-      responses:
-        '200': {}
-  /v1/files/@me:
-    get:
-      operationId: files.manage_files.get
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - files
+        - notifications
       parameters: []
       responses:
-        '200': {}
-    post:
-      operationId: files.manage_files.post
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - files
-      parameters: []
-      responses:
-        '200': {}
-  '/v1/files/@me/{fileID}':
-    delete:
-      operationId: files.manage_file
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - files
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: fileID
-      responses:
-        '200': {}
-  /v1/events/@me:
-    get:
-      operationId: events.get_events
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - events
-      parameters: []
-      responses:
-        '200': {}
-  /v1/search:
-    get:
-      operationId: search.search
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - search
-      parameters: []
-      responses:
-        '200': {}
-  /v1/search/@me/total_sponsors:
-    get:
-      operationId: search.search_sponsors
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - search
-      parameters: []
-      responses:
-        '200': {}
-  /v1/search/@me/sponsors:
-    post:
-      operationId: search.search_sponsors.post
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - search
-      parameters: []
-      responses:
-        '200': {}
-  /v1/integrations/discord:
-    get:
-      operationId: integrations.manage_discord_integration.get
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - integrations
-      parameters: []
-      responses:
-        '200': {}
-    delete:
-      operationId: integrations.manage_discord_integration.delete
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - integrations
-      parameters: []
-      responses:
-        '200': {}
-    post:
-      operationId: integrations.manage_discord_integration.post
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - integrations
-      parameters: []
-      responses:
-        '200': {}
-  /v1/integrations/discord/roles:
-    get:
-      operationId: integrations.get_discord_roles
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - integrations
-      parameters: []
-      responses:
-        '200': {}
-  '/v1/integrations/{userID}/discord/server':
-    get:
-      operationId: integrations.get_discord_server
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - integrations
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: userID
-      responses:
-        '200': {}
-  '/v1/integrations/{userID}/discord/invite':
-    get:
-      operationId: integrations.get_discord_invite
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - integrations
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: userID
-      responses:
-        '200': {}
-  '/v1/integrations/discord/{userID}/settings':
-    get:
-      operationId: integrations.get_set_discord_settings.get
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - integrations
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: userID
-      responses:
-        '200': {}
-      description: ''
-    post:
-      operationId: integrations.get_set_discord_settings.post
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - integrations
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: userID
-      responses:
-        '200': {}
-  /v1/feed/@me/total:
-    get:
-      operationId: feed.get_total_post_count
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - feed
-      parameters: []
-      responses:
-        '200': {}
-  /v1/feed/@me:
-    get:
-      operationId: feed.get_feed
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - feed
-      parameters: []
-      responses:
-        '200': {}
-  /v1/chat/@me/privacy_settings:
-    get:
-      operationId: chat.get_set_privacy_settings.get
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - chat
-      parameters: []
-      responses:
-        '200': {}
-    post:
-      operationId: chat.get_set_privacy_settings.post
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - chat
-      parameters: []
-      responses:
-        '200': {}
-  '/v1/chat/@me/block_list/{targetID}':
-    delete:
-      operationId: chat.unblock_user
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - chat
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: targetID
-      responses:
-        '200': {}
-  /v1/chat/@me/block_list:
-    get:
-      operationId: chat.block_user.get
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - chat
-      parameters: []
-      responses:
-        '200': {}
-    delete:
-      operationId: chat.block_user.delete
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - chat
-      parameters: []
-      responses:
-        '200': {}
-      description: ''
-    post:
-      operationId: chat.block_user.post
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - chat
-      parameters: []
-      responses:
-        '200': {}
-  /v1/chat/@me/unread:
-    get:
-      operationId: chat.manage_messages
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - chat
-      parameters: []
-      responses:
-        '200': {}
-  '/v1/chat/{convoID}/ack':
-    post:
-      operationId: chat.manage_messages.post
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - chat
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: convoID
-      responses:
-        '200': {}
-  '/v1/chat/{convoID}/messages/{messageID}':
-    delete:
-      operationId: chat.manage_message.delete
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - chat
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: convoID
-        - type: string
-          required: true
-          in: path
-          name: messageID
-      responses:
-        '200': {}
-    post:
-      operationId: chat.manage_message.post
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - chat
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: convoID
-        - type: string
-          required: true
-          in: path
-          name: messageID
-      responses:
-        '200': {}
-  '/v1/chat/{convoID}/messages':
-    get:
-      operationId: chat.manage_messages.get
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - chat
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: convoID
-      responses:
-        '200': {}
-    post:
-      operationId: chat.manage_messages.post_
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - chat
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: convoID
-      responses:
-        '200': {}
-  /v1/chat/@me/rtm/unread/start:
-    get:
-      operationId: chat.create_notice_rtm_link
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - chat
-      parameters: []
-      responses:
-        '200': {}
-  '/v1/chat/{convoID}/rtm/start':
-    get:
-      operationId: chat.create_rtm_link
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - chat
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: convoID
-      responses:
-        '200': {}
-  /v1/chat/@me/conversations:
-    get:
-      operationId: chat.get_conversations
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - chat
-      parameters: []
-      responses:
-        '200': {}
-  '/v1/chat/{convoID}/members/{userID}':
-    delete:
-      operationId: chat.remove_user
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - chat
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: convoID
-        - type: string
-          required: true
-          in: path
-          name: userID
-      responses:
-        '200': {}
-  /v1/chat/@me/new_conversation:
-    post:
-      operationId: chat.create_conversation
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - chat
-      parameters: []
-      responses:
-        '200': {}
-  /v1/chat/search:
-    get:
-      operationId: chat.search_for_users
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - chat
-      parameters: []
-      responses:
-        '200': {}
-  /v1/permissions/@me/roles/positions:
-    get:
-      operationId: perm.manage_role_positions.get
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - perm
-      parameters: []
-      responses:
-        '200': {}
-    post:
-      operationId: perm.manage_role_positions.post
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - perm
-      parameters: []
-      responses:
-        '200': {}
-  /v1/permissions/@me/roles:
-    get:
-      operationId: perm.manage_creator_roles.get
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - perm
-      parameters: []
-      responses:
-        '200': {}
-    post:
-      operationId: perm.manage_creator_roles.post
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - perm
-      parameters: []
-      responses:
-        '200': {}
-  '/v1/permissions/@me/roles/{roleID}':
-    delete:
-      operationId: perm.manage_creator_role.delete
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - perm
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: roleID
-      responses:
-        '200': {}
-    post:
-      operationId: perm.manage_creator_role.post
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - perm
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: roleID
-      responses:
-        '200': {}
-  /v1/permissions/@me/team:
-    get:
-      operationId: perm.manage_creator_team
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - perm
-      parameters: []
-      responses:
-        '200': {}
-  /v1/permissions/@me/team/search:
-    get:
-      operationId: perm.search_for_users
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - perm
-      parameters: []
-      responses:
-        '200': {}
-  '/v1/permissions/@me/team/{userID}/invite':
-    get:
-      operationId: perm.invite_user_to_team.get
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - perm
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: userID
-      responses:
-        '200': {}
-    post:
-      operationId: perm.invite_user_to_team.post
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - perm
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: userID
-      responses:
-        '200': {}
-  '/v1/permissions/{creatorID}/team/accept_invite':
-    get:
-      operationId: perm.accept_invite_user_to_team
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - perm
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: creatorID
-      responses:
-        '200': {}
-  '/v1/permissions/{creatorID}/team/{userID}':
-    delete:
-      operationId: perm.manage_user_from_team.delete
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - perm
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: creatorID
-        - type: string
-          required: true
-          in: path
-          name: userID
-      responses:
-        '200': {}
-    post:
-      operationId: perm.manage_user_from_team.post
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - perm
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: creatorID
-        - type: string
-          required: true
-          in: path
-          name: userID
-      responses:
-        '200': {}
-  /v1/permissions/@me/teams:
-    get:
-      operationId: perm.get_user_teams
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - perm
-      parameters: []
-      responses:
-        '200': {}
-  '/v1/comments/{postID}':
-    get:
-      operationId: comments.manage_comments.get
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - comments
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: postID
-      responses:
-        '200': {}
-    post:
-      operationId: comments.manage_comments.post
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - comments
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: postID
-      responses:
-        '200': {}
-  '/v1/comments/{postID}/comment/{commentID}':
-    delete:
-      operationId: comments.manage_comment.delete
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - comments
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: postID
-        - type: string
-          required: true
-          in: path
-          name: commentID
-      responses:
-        '200': {}
-    post:
-      operationId: comments.manage_comment.post
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - comments
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: postID
-        - type: string
-          required: true
-          in: path
-          name: commentID
-      responses:
-        '200': {}
-  '/v1/comments/{postID}/comment/{commentID}/replies/stats':
-    get:
-      operationId: comments.replies_stats.get
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - comments
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: postID
-        - type: string
-          required: true
-          in: path
-          name: commentID
-      responses:
-        '200': {}
-    post:
-      operationId: comments.replies_stats.post
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - comments
-      parameters:
-        - type: string
-          required: true
-          in: path
-          name: postID
-        - type: string
-          required: true
-          in: path
-          name: commentID
-      responses:
-        '200': {}
+        '200':
+          description: OK
   '/v1/comments/{postID}/comment/{commentID}/replies':
     get:
       operationId: comments.manage_comment_replies.get
@@ -2418,7 +2580,8 @@ paths:
           in: path
           name: commentID
       responses:
-        '200': {}
+        '200':
+          description: OK
     post:
       operationId: comments.manage_comment_replies.post
       consumes:
@@ -2437,60 +2600,1144 @@ paths:
           in: path
           name: commentID
       responses:
-        '200': {}
-  /v1/notifications/@me/unread_count:
+        '200':
+          description: OK
+  '/v1/comments/{postID}/comment/{commentID}/replies/stats':
     get:
-      operationId: notifications.get_recent_notifs
+      operationId: comments.replies_stats.get
       consumes:
         - application/json
       produces:
         - application/json
       tags:
-        - notifications
-      parameters: []
-      responses:
-        '200': {}
-  /v1/notifications/@me:
-    get:
-      operationId: notifications.get_notifications
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - notifications
-      parameters: []
-      responses:
-        '200': {}
-  '/v1/notifications/{notifID}/read':
-    post:
-      operationId: notifications.set_read
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - notifications
+        - comments
       parameters:
         - type: string
           required: true
           in: path
-          name: notifID
+          name: postID
+        - type: string
+          required: true
+          in: path
+          name: commentID
       responses:
-        '200': {}
-  /v1/notifications/@me/auth:
-    get:
-      operationId: notifications.set_user_key
+        '200':
+          description: OK
+    post:
+      operationId: comments.replies_stats.post
       consumes:
         - application/json
       produces:
         - application/json
       tags:
-        - notifications
+        - comments
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: postID
+        - type: string
+          required: true
+          in: path
+          name: commentID
+      responses:
+        '200':
+          description: OK
+  '/v1/comments/{postID}/comment/{commentID}':
+    delete:
+      operationId: comments.manage_comment.delete
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - comments
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: postID
+        - type: string
+          required: true
+          in: path
+          name: commentID
+      responses:
+        '200':
+          description: OK
+    post:
+      operationId: comments.manage_comment.post
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - comments
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: postID
+        - type: string
+          required: true
+          in: path
+          name: commentID
+      responses:
+        '200':
+          description: OK
+  '/v1/comments/{postID}':
+    get:
+      operationId: comments.manage_comments.get
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - comments
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: postID
+      responses:
+        '200':
+          description: OK
+    post:
+      operationId: comments.manage_comments.post
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - comments
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: postID
+      responses:
+        '200':
+          description: OK
+  /v1/permissions/@me/teams:
+    get:
+      operationId: perm.get_user_teams
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - perm
       parameters: []
       responses:
-        '200': {}
-
+        '200':
+          description: OK
+  '/v1/permissions/{creatorID}/team/{userID}':
+    delete:
+      operationId: perm.manage_user_from_team.delete
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - perm
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: creatorID
+        - type: string
+          required: true
+          in: path
+          name: userID
+      responses:
+        '200':
+          description: OK
+    post:
+      operationId: perm.manage_user_from_team.post
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - perm
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: creatorID
+        - type: string
+          required: true
+          in: path
+          name: userID
+      responses:
+        '200':
+          description: OK
+  '/v1/permissions/{creatorID}/team/accept_invite':
+    get:
+      operationId: perm.accept_invite_user_to_team
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - perm
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: creatorID
+      responses:
+        '200':
+          description: OK
+  '/v1/permissions/@me/team/{userID}/invite':
+    get:
+      operationId: perm.invite_user_to_team.get
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - perm
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: userID
+      responses:
+        '200':
+          description: OK
+    post:
+      operationId: perm.invite_user_to_team.post
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - perm
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: userID
+      responses:
+        '200':
+          description: OK
+  /v1/permissions/@me/team/search:
+    get:
+      operationId: perm.search_for_users
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - perm
+      parameters: []
+      responses:
+        '200':
+          description: OK
+  /v1/permissions/@me/team:
+    get:
+      operationId: perm.manage_creator_team
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - perm
+      parameters: []
+      responses:
+        '200':
+          description: OK
+  '/v1/permissions/@me/roles/{roleID}':
+    delete:
+      operationId: perm.manage_creator_role.delete
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - perm
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: roleID
+      responses:
+        '200':
+          description: OK
+    post:
+      operationId: perm.manage_creator_role.post
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - perm
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: roleID
+      responses:
+        '200':
+          description: OK
+  /v1/permissions/@me/roles:
+    get:
+      operationId: perm.manage_creator_roles.get
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - perm
+      parameters: []
+      responses:
+        '200':
+          description: OK
+    post:
+      operationId: perm.manage_creator_roles.post
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - perm
+      parameters: []
+      responses:
+        '200':
+          description: OK
+  /v1/permissions/@me/roles/positions:
+    get:
+      operationId: perm.manage_role_positions.get
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - perm
+      parameters: []
+      responses:
+        '200':
+          description: OK
+    post:
+      operationId: perm.manage_role_positions.post
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - perm
+      parameters: []
+      responses:
+        '200':
+          description: OK
+  /v1/chat/search:
+    get:
+      operationId: chat.search_for_users
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - chat
+      parameters: []
+      responses:
+        '200':
+          description: OK
+  /v1/chat/@me/new_conversation:
+    post:
+      operationId: chat.create_conversation
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - chat
+      parameters: []
+      responses:
+        '200':
+          description: OK
+  '/v1/chat/{convoID}/members/{userID}':
+    delete:
+      operationId: chat.remove_user
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - chat
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: convoID
+        - type: string
+          required: true
+          in: path
+          name: userID
+      responses:
+        '200':
+          description: OK
+  /v1/chat/@me/conversations:
+    get:
+      operationId: chat.get_conversations
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - chat
+      parameters: []
+      responses:
+        '200':
+          description: OK
+  '/v1/chat/{convoID}/rtm/start':
+    get:
+      operationId: chat.create_rtm_link
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - chat
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: convoID
+      responses:
+        '200':
+          description: OK
+  /v1/chat/@me/rtm/unread/start:
+    get:
+      operationId: chat.create_notice_rtm_link
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - chat
+      parameters: []
+      responses:
+        '200':
+          description: OK
+  '/v1/chat/{convoID}/messages':
+    get:
+      operationId: chat.manage_messages.get
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - chat
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: convoID
+      responses:
+        '200':
+          description: OK
+    post:
+      operationId: chat.manage_messages.post_
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - chat
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: convoID
+      responses:
+        '200':
+          description: OK
+  '/v1/chat/{convoID}/messages/{messageID}':
+    delete:
+      operationId: chat.manage_message.delete
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - chat
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: convoID
+        - type: string
+          required: true
+          in: path
+          name: messageID
+      responses:
+        '200':
+          description: OK
+    post:
+      operationId: chat.manage_message.post
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - chat
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: convoID
+        - type: string
+          required: true
+          in: path
+          name: messageID
+      responses:
+        '200':
+          description: OK
+  '/v1/chat/{convoID}/ack':
+    post:
+      operationId: chat.manage_messages.post
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - chat
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: convoID
+      responses:
+        '200':
+          description: OK
+  /v1/chat/@me/unread:
+    get:
+      operationId: chat.manage_messages
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - chat
+      parameters: []
+      responses:
+        '200':
+          description: OK
+  /v1/chat/@me/block_list:
+    get:
+      operationId: chat.block_user.get
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - chat
+      parameters: []
+      responses:
+        '200':
+          description: OK
+    delete:
+      operationId: chat.block_user.delete
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - chat
+      parameters: []
+      responses:
+        '200':
+          description: OK
+      description: ''
+    post:
+      operationId: chat.block_user.post
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - chat
+      parameters: []
+      responses:
+        '200':
+          description: OK
+  '/v1/chat/@me/block_list/{targetID}':
+    delete:
+      operationId: chat.unblock_user
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - chat
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: targetID
+      responses:
+        '200':
+          description: OK
+  /v1/chat/@me/privacy_settings:
+    get:
+      operationId: chat.get_set_privacy_settings.get
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - chat
+      parameters: []
+      responses:
+        '200':
+          description: OK
+    post:
+      operationId: chat.get_set_privacy_settings.post
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - chat
+      parameters: []
+      responses:
+        '200':
+          description: OK
+  /v1/feed/@me:
+    get:
+      operationId: feed.get_feed
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - feed
+      parameters: []
+      responses:
+        '200':
+          description: OK
+  /v1/feed/@me/total:
+    get:
+      operationId: feed.get_total_post_count
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - feed
+      parameters: []
+      responses:
+        '200':
+          description: OK
+  '/v1/integrations/discord/{userID}/settings':
+    get:
+      operationId: integrations.get_set_discord_settings.get
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - integrations
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: userID
+      responses:
+        '200':
+          description: OK
+      description: ''
+    post:
+      operationId: integrations.get_set_discord_settings.post
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - integrations
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: userID
+      responses:
+        '200':
+          description: OK
+  '/v1/integrations/{userID}/discord/invite':
+    get:
+      operationId: integrations.get_discord_invite
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - integrations
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: userID
+      responses:
+        '200':
+          description: OK
+  '/v1/integrations/{userID}/discord/server':
+    get:
+      operationId: integrations.get_discord_server
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - integrations
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: userID
+      responses:
+        '200':
+          description: OK
+  /v1/integrations/discord/roles:
+    get:
+      operationId: integrations.get_discord_roles
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - integrations
+      parameters: []
+      responses:
+        '200':
+          description: OK
+  /v1/integrations/discord:
+    get:
+      operationId: integrations.manage_discord_integration.get
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - integrations
+      parameters: []
+      responses:
+        '200':
+          description: OK
+    delete:
+      operationId: integrations.manage_discord_integration.delete
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - integrations
+      parameters: []
+      responses:
+        '200':
+          description: OK
+    post:
+      operationId: integrations.manage_discord_integration.post
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - integrations
+      parameters: []
+      responses:
+        '200':
+          description: OK
+  /v1/search/@me/sponsors:
+    post:
+      operationId: search.search_sponsors.post
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - search
+      parameters: []
+      responses:
+        '200':
+          description: OK
+  /v1/search/@me/total_sponsors:
+    get:
+      operationId: search.search_sponsors
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - search
+      parameters: []
+      responses:
+        '200':
+          description: OK
+  /v1/search:
+    get:
+      operationId: search.search
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - search
+      parameters: []
+      responses:
+        '200':
+          description: OK
+  /v1/events/@me:
+    get:
+      operationId: events.get_events
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - events
+      parameters: []
+      responses:
+        '200':
+          description: OK
+  '/v1/files/@me/{fileID}':
+    delete:
+      operationId: files.manage_file
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - files
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: fileID
+      responses:
+        '200':
+          description: OK
+  /v1/files/@me:
+    get:
+      operationId: files.manage_files.get
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - files
+      parameters: []
+      responses:
+        '200':
+          description: OK
+    post:
+      operationId: files.manage_files.post
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - files
+      parameters: []
+      responses:
+        '200':
+          description: OK
+  '/v1/posts/@me/{postID}/poll/close':
+    get:
+      operationId: posts.toggle_poll
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - posts
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: postID
+      responses:
+        '200':
+          description: OK
+  '/v1/posts/{creatorID}/{postID}/poll/results':
+    get:
+      operationId: posts.get_poll_results
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - posts
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: creatorID
+        - type: string
+          required: true
+          in: path
+          name: postID
+      responses:
+        '200':
+          description: OK
+  '/v1/posts/{creatorID}/{postID}/poll/answer':
+    post:
+      operationId: posts.poll_post.post
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - posts
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: creatorID
+        - type: string
+          required: true
+          in: path
+          name: postID
+      responses:
+        '200':
+          description: OK
+  '/v1/posts/{creatorID}/{postID}/poll/verify':
+    get:
+      operationId: posts.verify_poll_results
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - posts
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: creatorID
+        - type: string
+          required: true
+          in: path
+          name: postID
+      responses:
+        '200':
+          description: OK
+  '/v1/posts/{creatorID}/{postID}/poll':
+    get:
+      operationId: posts.poll_post
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - posts
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: creatorID
+        - type: string
+          required: true
+          in: path
+          name: postID
+      responses:
+        '200':
+          description: OK
+  /v1/posts/@me:
+    post:
+      operationId: posts.create_a_post
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - posts
+      parameters: []
+      responses:
+        '200':
+          description: OK
+  '/v1/posts/{userID}':
+    get:
+      operationId: posts.get_posts
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - posts
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: userID
+      responses:
+        '200':
+          description: OK
+  '/v1/posts/{userID}/post/{postID}':
+    get:
+      operationId: posts.get_post.get
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - posts
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: userID
+        - type: string
+          required: true
+          in: path
+          name: postID
+      responses:
+        '200':
+          description: OK
+    delete:
+      operationId: posts.get_post.delete
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - posts
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: userID
+        - type: string
+          required: true
+          in: path
+          name: postID
+      responses:
+        '200':
+          description: OK
+    post:
+      operationId: posts.get_post.post
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - posts
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: userID
+        - type: string
+          required: true
+          in: path
+          name: postID
+      responses:
+        '200':
+          description: OK
+  '/v1/posts/{userID}/post/{postID}/publish':
+    post:
+      operationId: posts.publish_post
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - posts
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: userID
+        - type: string
+          required: true
+          in: path
+          name: postID
+      responses:
+        '200':
+          description: OK
+  '/v1/posts/@me/post/{postID}/secret_keys':
+    get:
+      operationId: posts.get_post_secret_keys.get
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - posts
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: postID
+      responses:
+        '200':
+          description: OK
+    delete:
+      operationId: posts.get_post_secret_keys.delete
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - posts
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: postID
+      responses:
+        '200':
+          description: OK
+    post:
+      operationId: posts.get_post_secret_keys.post
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - posts
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: postID
+      responses:
+        '200':
+          description: OK
+  '/v1/posts/@me/post/{postID}/secret_keys/{keyID}':
+    delete:
+      operationId: posts.delete_post_secret_keys
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - posts
+      parameters:
+        - type: string
+          required: true
+          in: path
+          name: postID
+        - type: string
+          required: true
+          in: path
+          name: keyID
+      responses:
+        '200':
+          description: OK
+  /v1/oauth/@me/profile:
+    get:
+      operationId: oauth.oauth_get_profile
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      tags:
+        - oauth
+      parameters: []
+      responses:
+        '200':
+          description: OK
 host: api-dev.sponsus.org
 produces:
   - application/json
