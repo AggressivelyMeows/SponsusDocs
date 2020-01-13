@@ -681,7 +681,11 @@ paths:
           in: path
           name: tierID
       responses:
-        '200': {}
+        '200':
+          schema:
+            $ref: '#/definitions/APIBasicSuccess'
+      summary: Delete a tier
+      description: ''
     post:
       operationId: payments.manage_tier.post
       consumes:
@@ -998,7 +1002,16 @@ paths:
           in: path
           name: userID
       responses:
-        '200': {}
+        '200':
+          schema:
+            type: object
+            properties:
+              success:
+                type: string
+              total:
+                type: number
+      description: Gets a total of all posts released by this creator (for use in the frontend)
+      summary: Get a creators post count
   /v1/profiles/@me:
     get:
       operationId: profile.get_set_user_profile.get
@@ -1010,7 +1023,22 @@ paths:
         - profile
       parameters: []
       responses:
-        '200': {}
+        '200':
+          schema:
+            type: object
+            properties:
+              success:
+                type: string
+              profile:
+                $ref: '#/definitions/Profile'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/APIKeyNoPermissions'
+      summary: "Get the logged in user's profile"
+      security:
+        - Authentication: []
+      description: Requires profile.profile.read
     post:
       operationId: profile.get_set_user_profile.post
       consumes:
@@ -1019,9 +1047,98 @@ paths:
         - application/json
       tags:
         - profile
-      parameters: []
+      parameters:
+        - in: body
+          name: body
+          schema:
+            type: object
+            properties:
+              description:
+                type: string
+              about:
+                type: string
+              theme:
+                type: string
+              tags:
+                type: array
+                items:
+                  type: string
+              is_nsfw:
+                type: boolean
+              cards:
+                $ref: '#/definitions/ProfileCard'
+              nickname:
+                type: string
+          description: Updates based on the fields provided.
+          x-examples:
+            Example - Remove nickname:
+              nickname: null
+            Example - Update more than 1 value:
+              about: 'Hello!'
+              description: This is a new description
+        - in: body
+          name: body
+          schema:
+            type: object
+            properties:
+              description:
+                type: string
+              about:
+                type: string
+              theme:
+                type: string
+              tags:
+                type: array
+                items:
+                  type: string
+              is_nsfw:
+                type: boolean
+              cards:
+                $ref: '#/definitions/ProfileCard'
+              nickname:
+                type: string
+          description: Updates based on the fields provided.
+          x-examples:
+            Example - Remove nickname:
+              nickname: null
+            example-2: {}
+        - in: body
+          name: body
+          schema:
+            type: object
+            properties:
+              description:
+                type: string
+              about:
+                type: string
+              theme:
+                type: string
+              tags:
+                type: array
+                items:
+                  type: string
+              is_nsfw:
+                type: boolean
+              cards:
+                $ref: '#/definitions/ProfileCard'
+              nickname:
+                type: string
+          description: Updates based on the fields provided.
+          x-examples:
+            example-1: {}
       responses:
-        '200': {}
+        '200':
+          schema:
+            $ref: '#/definitions/APIBasicSuccess'
+          examples: {}
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/APIKeyNoPermissions'
+      summary: Update your profile
+      description: Requires profile.profile.write
+      security:
+        - Authentication: []
   '/v1/profiles/{userID}':
     get:
       operationId: profile.get_user_profile
@@ -1037,30 +1154,16 @@ paths:
           in: path
           name: userID
       responses:
-        '200': {}
-  /v1/profiles/@me/nsfw:
-    delete:
-      operationId: profile.add_nsfw_bypass.delete
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - profile
-      parameters: []
-      responses:
-        '200': {}
-    post:
-      operationId: profile.add_nsfw_bypass.post
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - profile
-      parameters: []
-      responses:
-        '200': {}
+        '200':
+          schema:
+            type: object
+            properties:
+              success:
+                type: string
+              profile:
+                $ref: '#/definitions/Profile'
+      description: ''
+      summary: Get a creators profile
   '/v1/profiles/{userID}/avatar/info':
     get:
       operationId: profile.get_user_avatar_info
@@ -1076,7 +1179,18 @@ paths:
           in: path
           name: userID
       responses:
-        '200': {}
+        '200':
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+              is_image:
+                type: string
+              key:
+                type: string
+      summary: "Get user's avatar info"
+      description: This is used to check if an avatar is a video or image. The `key` param is used to beat caching while giving us caching.
   '/v1/profiles/{userID}/avatar/{key}':
     get:
       operationId: profile.get_user_avatar_with_key.get
@@ -1096,7 +1210,12 @@ paths:
           in: path
           name: key
       responses:
-        '200': {}
+        '200':
+          schema:
+            type: 'null'
+          headers: {}
+      summary: Get a users avatar
+      description: 'Returns an image suitable for your device (WebP for those who support it, PNG for those who cant)'
     head:
       operationId: profile.get_user_avatar_with_key.head
       consumes:
@@ -1131,7 +1250,11 @@ paths:
           in: path
           name: userID
       responses:
-        '200': {}
+        '200':
+          schema:
+            type: 'null'
+      description: 'Returns an image suitable for your device (WebP for those who support it, PNG for those who cant)'
+      summary: Get a users avatar
     head:
       operationId: profile.get_user_avatar.head
       consumes:
@@ -1163,6 +1286,8 @@ paths:
           name: userID
       responses:
         '200': {}
+      description: 'Returns an image suitable for your device (WebP for those who support it, PNG for those who cant)'
+      summary: Get a users background
   /v1/profiles/@me/avatar/upload:
     post:
       operationId: profile.upload_user_avatar
@@ -1172,9 +1297,23 @@ paths:
         - application/json
       tags:
         - profile
-      parameters: []
+      parameters:
+        - in: formData
+          type: file
+          name: file
+          description: The new avatar in file form
       responses:
-        '200': {}
+        '200':
+          schema:
+            $ref: '#/definitions/APIBasicSuccess'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/APIKeyNoPermissions'
+      description: Requires profile.manage_images.write
+      security:
+        - Authentication: []
+      summary: "Update the user's avatar"
   /v1/profiles/@me/background/upload:
     post:
       operationId: profile.upload_user_background
@@ -1184,9 +1323,25 @@ paths:
         - application/json
       tags:
         - profile
-      parameters: []
+      parameters:
+        - in: formData
+          type: string
       responses:
-        '200': {}
+        '200':
+          schema:
+            $ref: '#/definitions/APIBasicSuccess'
+        '400':
+          description: The was an error while uploading
+          schema:
+            $ref: '#/definitions/APIError'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/APIKeyNoPermissions'
+      description: Requires profile.manage_images.write
+      security:
+        - Authentication: []
+      summary: "Update the user's background"
   /v1/oauth/@me/profile:
     get:
       operationId: oauth.oauth_get_profile
@@ -2381,5 +2536,6 @@ paths:
 host: api.sponsus.org
 produces:
   - application/json
+  - multipart/form-data
 consumes:
   - application/json
