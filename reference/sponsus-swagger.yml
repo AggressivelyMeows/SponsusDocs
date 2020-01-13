@@ -1342,7 +1342,7 @@ paths:
       security:
         - Authentication: []
       summary: "Update the user's background"
-host: api.sponsus.org
+host: api-dev.sponsus.org
 produces:
   - application/json
   - multipart/form-data
