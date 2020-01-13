@@ -2498,29 +2498,7 @@ paths:
       parameters: []
       responses:
         '200': {}
-  /v1/notifications/@me/settings:
-    get:
-      operationId: notifications.get_set_settings.get
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - notifications
-      parameters: []
-      responses:
-        '200': {}
-    post:
-      operationId: notifications.get_set_settings.post
-      consumes:
-        - application/json
-      produces:
-        - application/json
-      tags:
-        - notifications
-      parameters: []
-      responses:
-        '200': {}
+
 host: api.sponsus.org
 produces:
   - application/json
