@@ -1,0 +1,2686 @@
+openapi: 3.0.0
+info:
+  title: Sponsus API
+  contact:
+    name: Sponsus
+    email: developers@sponsus.org
+  version: 1.0.0
+  description: API spec for sponsus.org
+servers:
+  - url: 'https://api-dev.sponsus.org'
+    variables: {}
+paths:
+  /v1/auth/@me:
+    post:
+      tags:
+        - authentication
+      summary: authentication.manage_user_account
+      description: Update user account
+      operationId: authentication.manage_user_account
+      parameters: []
+      requestBody:
+        description: Your username
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/updates'
+        required: false
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIBasicSuccess'
+              example: {}
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+      deprecated: false
+  /v1/payments/@me/tiers:
+    post:
+      tags:
+        - pay
+      summary: Create a new tier
+      description: Requires payments.tiers.write
+      operationId: payments.manage_tiers.post
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            encoding: {}
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                price:
+                  type: number
+        required: false
+      responses:
+        '201':
+          description: Returns the created tier
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: string
+                  tier:
+                    $ref: '#/components/schemas/Tier'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
+      deprecated: false
+      security:
+        - API key: []
+    get:
+      tags:
+        - payments
+      summary: Get your tiers
+      description: Requires payments.tiers.read
+      operationId: payments.manage_tiers.get
+      parameters: []
+      responses:
+        '200':
+          description: Returns your tiers
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  tier:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Tier'
+              example:
+                success: true
+                tiers:
+                  - _id: 1732814647763013600
+                    title: 'Sponsor Sponsus!'
+                    price: 5
+                    description: 'Demo tier!'
+                    userID: 1729788214794915800
+                    advanced:
+                      limit:
+                        enabled: true
+                        max: 6
+                      discord_role:
+                        name: Writing Team
+                        id: 622152828831662100
+                    created_at: 1556109440
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
+      deprecated: false
+      security:
+        - API key: []
+  '/v1/payments/@me/tiers/{tierID}':
+    delete:
+      summary: Delete a tier
+      description: Delete a tier
+      operationId: payments.manage_tier.delete
+      parameters:
+        - name: tierID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIBasicSuccess'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+      deprecated: false
+      tags:
+        - payments
+      security:
+        - API key: []
+    post:
+      tags:
+        - payments
+      summary: Update a tier
+      description: Requires payments.tiers.write
+      operationId: payments.manage_tier.post
+      parameters:
+        - name: tierID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            encoding: {}
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                advanced:
+                  type: object
+                  properties:
+                    limit:
+                      type: object
+                      properties:
+                        enabled:
+                          type: boolean
+                        max:
+                          type: number
+                    discord_role:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+        required: false
+        description: ''
+      responses:
+        '200':
+          description: Update successful
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIBasicSuccess'
+              example: {}
+        '401':
+          description: You do not have permission to write to payments.tiers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
+        '403':
+          description: You do not have write access to this tier.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+      deprecated: false
+      security:
+        - API key: []
+    parameters:
+      - schema:
+          type: string
+        name: tierID
+        in: path
+        description: ''
+        required: true
+  '/v1/profiles/{userID}/per_month':
+    get:
+      tags:
+        - profile
+      summary: Get a creators amount per month
+      description: Get
+      operationId: profile.calc_per_month.get
+      parameters:
+        - name: userID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/profile.calc_per_month.getResponse'
+              example:
+                success: true
+                total: 10
+                sponsors: 2
+      deprecated: false
+    parameters:
+      - schema:
+          type: string
+        name: userID
+        in: path
+        required: true
+  '/v1/profiles/{userID}/post_tags':
+    get:
+      tags:
+        - profile
+      summary: Get a creators post tags
+      description: Get a creators post tags
+      operationId: profile.get_post_tags
+      parameters:
+        - name: userID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/profile.get_post_tagsResponse'
+              example: {}
+      deprecated: false
+    parameters:
+      - schema:
+          type: string
+        name: userID
+        in: path
+        required: true
+  '/v1/profiles/{userID}/post_total':
+    get:
+      tags:
+        - profile
+      summary: profile.get_post_total
+      description: Gets a total of all posts released by this creator (for use in the frontend)
+      operationId: profile.get_post_total
+      parameters:
+        - name: userID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/profile.get_post_totalResponse'
+      deprecated: false
+    parameters:
+      - schema:
+          type: string
+        name: userID
+        in: path
+        required: true
+  /v1/profiles/@me:
+    get:
+      tags:
+        - profile
+      summary: Get a creators profile
+      description: |-
+        Requires profile.profile.read
+
+        @me means that this request is local to the creator. This will only return results for the logged in user.
+      operationId: profile.user_profile.get
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/profile.get_set_user_profile.getResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
+      deprecated: false
+    post:
+      tags:
+        - profile
+      summary: profile.get_set_user_profile.post
+      description: Requires profile.profile.write
+      operationId: profile.user_profile.post
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            encoding: {}
+            schema:
+              type: object
+              properties:
+                nickname:
+                  type: string
+                about:
+                  type: string
+                description:
+                  type: string
+                cards:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      title:
+                        type: string
+                      content:
+                        type: string
+                      image:
+                        type: string
+                      link:
+                        type: string
+                theme:
+                  type: string
+                is_nsfw:
+                  type: boolean
+                tags:
+                  type: array
+                  items:
+                    type: string
+        required: false
+        description: You can send a minimum of 1 field to update. This will only update fields present in the the request.
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIBasicSuccess'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
+      deprecated: false
+    parameters: []
+  '/v1/profiles/{userID}':
+    get:
+      tags:
+        - profile
+      summary: Get a creators profile
+      description: Get a creators profile
+      operationId: profile.get_profile
+      parameters:
+        - name: userID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/profile.get_user_profileResponse'
+      deprecated: false
+    parameters:
+      - schema:
+          type: string
+        name: userID
+        in: path
+        required: true
+  '/v1/profiles/{userID}/avatar/info':
+    get:
+      tags:
+        - profile
+      summary: "Get a user's avatar's info"
+      description: This is used to check if an avatar is a video or image. The `key` param is used to beat caching while giving us caching for this specific key.
+      operationId: profile.get_user_avatar_info
+      parameters:
+        - name: userID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/profile.get_user_avatar_infoResponse'
+      deprecated: false
+  '/v1/profiles/avatar/{key}':
+    get:
+      tags:
+        - profile
+      summary: profile.get_user_avatar_with_key.get
+      description: 'Returns an image suitable for your device (WebP for those who support it, PNG for those who cant)'
+      operationId: profile.get_user_avatar_with_key.get
+      parameters:
+        - name: userID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+        - name: key
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                description: OK
+                nullable: true
+      deprecated: false
+    parameters:
+      - schema:
+          type: string
+        name: ''
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: key
+        in: path
+        required: true
+  '/v1/profiles/{userID}/avatar/{key}':
+    get:
+      tags:
+        - profile
+      summary: "Get a creator's avatar"
+      description: 'Returns an image suitable for your device (WebP for those who support it, PNG for those who cant)'
+      operationId: profile.avatar
+      parameters:
+        - name: userID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                description: OK
+                nullable: true
+        '':
+          description: Returns an image object
+      deprecated: false
+    parameters:
+      - schema:
+          type: string
+        name: userID
+        in: path
+        required: true
+      - schema:
+          type: string
+        name: key
+        in: path
+        required: true
+  '/v1/profiles/{userID}/background':
+    get:
+      tags:
+        - profile
+      summary: "Get a creator's background"
+      description: 'Returns an image suitable for your device (WebP for those who support it, PNG for those who cant)'
+      operationId: profile.background
+      parameters:
+        - name: userID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Returns an image object
+          headers: {}
+      deprecated: false
+    parameters:
+      - schema:
+          type: string
+        name: userID
+        in: path
+        required: true
+  /v1/profiles/@me/avatar/upload:
+    post:
+      tags:
+        - profile
+      summary: "Update a creator's avatar"
+      description: Requires profile.manage_images.write
+      operationId: profile.upload_user_avatar
+      parameters: []
+      requestBody:
+        content:
+          multipart/form-data:
+            encoding: {}
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  description: The new avatar in file form
+                  format: binary
+        required: false
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIBasicSuccess'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
+      deprecated: false
+  /v1/profiles/@me/background/upload:
+    post:
+      tags:
+        - profile
+      summary: "Update a creator's background"
+      description: Requires profile.manage_images.write
+      operationId: profile.upload_user_background
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            encoding: {}
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+        required: false
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIBasicSuccess'
+        '400':
+          description: The was an error while uploading
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
+      deprecated: false
+  /v1/oauth/@me/profile:
+    get:
+      tags:
+        - oauth
+      summary: "Get the logged in user's profile"
+      operationId: oauth.oauth_get_profile
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  profile:
+                    $ref: '#/components/schemas/Profile'
+      deprecated: false
+      security:
+        - API key: []
+  /v1/posts/@me:
+    post:
+      tags:
+        - posts
+      summary: Create a post
+      operationId: posts.create_a_post
+      parameters: []
+      responses:
+        '201':
+          description: Created
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  postID:
+                    type: string
+                  post_slug:
+                    type: string
+                  post_url:
+                    type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+      deprecated: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  description: 'Must be either text, video, audio, or image'
+                title:
+                  type: string
+                price_to_view:
+                  type: string
+                content:
+                  type: string
+                  maxLength: 100000
+                showing:
+                  type: string
+                publish_at:
+                  type: string
+                  description: 'If included, must be a UTC ISO formatted datetime string. For example: 2020-01-21T00:00:00.000Z'
+                  format: date-time
+                image:
+                  type: object
+                  properties:
+                    src:
+                      type: array
+                      items:
+                        type: string
+                video:
+                  type: object
+                  properties:
+                    src:
+                      type: string
+                audio:
+                  type: object
+                  properties:
+                    src:
+                      type: string
+                    cover_image:
+                      type: string
+                    background_image:
+                      type: string
+                    include_in_rss:
+                      type: string
+                    title:
+                      type: string
+                nsfw:
+                  type: string
+                is_hidden:
+                  type: string
+                tags:
+                  type: string
+                attachments:
+                  type: string
+                  maxLength: 20
+                destination:
+                  type: string
+                  description: The user ID of where you want to send this post. Defaults to your account.
+              required:
+                - title
+                - price_to_view
+                - content
+        description: 'If you set the type to something other than text, then the corresponding object must be included! If type is audio, for example, then the audio object **must** be present.'
+      security:
+        - API key: []
+      description: Creates a new post
+  '/v1/posts/{userID}':
+    get:
+      tags:
+        - posts
+      summary: posts.get_posts
+      operationId: posts.get_posts
+      parameters:
+        - name: userID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  '/v1/posts/{userID}/post/{postID}':
+    get:
+      tags:
+        - posts
+      summary: posts.get_post.get
+      operationId: posts.get_post.get
+      parameters:
+        - name: userID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+        - name: postID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+    delete:
+      tags:
+        - posts
+      summary: posts.get_post.delete
+      operationId: posts.get_post.delete
+      parameters:
+        - name: userID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+        - name: postID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+    post:
+      tags:
+        - posts
+      summary: posts.get_post.post
+      operationId: posts.get_post.post
+      parameters:
+        - name: userID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+        - name: postID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  '/v1/posts/{userID}/post/{postID}/publish':
+    post:
+      tags:
+        - posts
+      summary: posts.publish_post
+      operationId: posts.publish_post
+      parameters:
+        - name: userID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+        - name: postID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  '/v1/posts/@me/post/{postID}/secret_keys':
+    get:
+      tags:
+        - posts
+      summary: posts.get_post_secret_keys.get
+      operationId: posts.get_post_secret_keys.get
+      parameters:
+        - name: postID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+    delete:
+      tags:
+        - posts
+      summary: posts.get_post_secret_keys.delete
+      operationId: posts.get_post_secret_keys.delete
+      parameters:
+        - name: postID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+    post:
+      tags:
+        - posts
+      summary: posts.get_post_secret_keys.post
+      operationId: posts.get_post_secret_keys.post
+      parameters:
+        - name: postID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  '/v1/posts/@me/post/{postID}/secret_keys/{keyID}':
+    delete:
+      tags:
+        - posts
+      summary: posts.delete_post_secret_keys
+      operationId: posts.delete_post_secret_keys
+      parameters:
+        - name: postID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+        - name: keyID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  '/v1/files/@me/{fileID}':
+    delete:
+      tags:
+        - files
+      summary: files.manage_file
+      operationId: files.manage_file
+      parameters:
+        - name: fileID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  /v1/files/@me:
+    get:
+      tags:
+        - files
+      summary: files.manage_files.get
+      operationId: files.manage_files.get
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+    post:
+      tags:
+        - files
+      summary: files.manage_files.post
+      operationId: files.manage_files.post
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  /v1/events/@me:
+    get:
+      tags:
+        - events
+      summary: events.get_events
+      operationId: events.get_events
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  /v1/search/@me/sponsors:
+    post:
+      tags:
+        - search
+      summary: search.search_sponsors.post
+      operationId: search.search_sponsors.post
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  /v1/search/@me/total_sponsors:
+    get:
+      tags:
+        - search
+      summary: search.search_sponsors
+      operationId: search.search_sponsors
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  /v1/search:
+    get:
+      tags:
+        - search
+      summary: search.search
+      operationId: search.search
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  '/v1/integrations/discord/{userID}/settings':
+    get:
+      tags:
+        - integrations
+      summary: integrations.get_set_discord_settings.get
+      operationId: integrations.get_set_discord_settings.get
+      parameters:
+        - name: userID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+    post:
+      tags:
+        - integrations
+      summary: integrations.get_set_discord_settings.post
+      operationId: integrations.get_set_discord_settings.post
+      parameters:
+        - name: userID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  '/v1/integrations/{userID}/discord/invite':
+    get:
+      tags:
+        - integrations
+      summary: integrations.get_discord_invite
+      operationId: integrations.get_discord_invite
+      parameters:
+        - name: userID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  '/v1/integrations/{userID}/discord/server':
+    get:
+      tags:
+        - integrations
+      summary: integrations.get_discord_server
+      operationId: integrations.get_discord_server
+      parameters:
+        - name: userID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  /v1/integrations/discord/roles:
+    get:
+      tags:
+        - integrations
+      summary: integrations.get_discord_roles
+      operationId: integrations.get_discord_roles
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  /v1/integrations/discord:
+    get:
+      tags:
+        - integrations
+      summary: integrations.manage_discord_integration.get
+      operationId: integrations.manage_discord_integration.get
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+    delete:
+      tags:
+        - integrations
+      summary: integrations.manage_discord_integration.delete
+      operationId: integrations.manage_discord_integration.delete
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+    post:
+      tags:
+        - integrations
+      summary: integrations.manage_discord_integration.post
+      operationId: integrations.manage_discord_integration.post
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  /v1/feed/@me:
+    get:
+      tags:
+        - feed
+      summary: feed.get_feed
+      operationId: feed.get_feed
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  /v1/feed/@me/total:
+    get:
+      tags:
+        - feed
+      summary: feed.get_total_post_count
+      operationId: feed.get_total_post_count
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  /v1/chat/search:
+    get:
+      tags:
+        - chat
+      summary: chat.search_for_users
+      operationId: chat.search_for_users
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  /v1/chat/@me/new_conversation:
+    post:
+      tags:
+        - chat
+      summary: chat.create_conversation
+      operationId: chat.create_conversation
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  '/v1/chat/{convoID}/members/{userID}':
+    delete:
+      tags:
+        - chat
+      summary: chat.remove_user
+      operationId: chat.remove_user
+      parameters:
+        - name: convoID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+        - name: userID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  /v1/chat/@me/conversations:
+    get:
+      tags:
+        - chat
+      summary: chat.get_conversations
+      operationId: chat.get_conversations
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  '/v1/chat/{convoID}/rtm/start':
+    get:
+      tags:
+        - chat
+      summary: chat.create_rtm_link
+      operationId: chat.create_rtm_link
+      parameters:
+        - name: convoID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  /v1/chat/@me/rtm/unread/start:
+    get:
+      tags:
+        - chat
+      summary: chat.create_notice_rtm_link
+      operationId: chat.create_notice_rtm_link
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  '/v1/chat/{convoID}/messages':
+    get:
+      tags:
+        - chat
+      summary: chat.manage_messages.get
+      operationId: chat.manage_messages.get
+      parameters:
+        - name: convoID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+    post:
+      tags:
+        - chat
+      summary: chat.manage_messages.post_
+      operationId: chat.manage_messages.post_
+      parameters:
+        - name: convoID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  '/v1/chat/{convoID}/messages/{messageID}':
+    delete:
+      tags:
+        - chat
+      summary: chat.manage_message.delete
+      operationId: chat.manage_message.delete
+      parameters:
+        - name: convoID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+        - name: messageID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+    post:
+      tags:
+        - chat
+      summary: chat.manage_message.post
+      operationId: chat.manage_message.post
+      parameters:
+        - name: convoID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+        - name: messageID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  '/v1/chat/{convoID}/ack':
+    post:
+      tags:
+        - chat
+      summary: chat.manage_messages.post1
+      operationId: chat.manage_messages.post1
+      parameters:
+        - name: convoID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  /v1/chat/@me/unread:
+    get:
+      tags:
+        - chat
+      summary: chat.manage_messages
+      operationId: chat.manage_messages
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  /v1/chat/@me/block_list:
+    get:
+      tags:
+        - chat
+      summary: chat.block_user.get
+      operationId: chat.block_user.get
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+    delete:
+      tags:
+        - chat
+      summary: chat.block_user.delete
+      operationId: chat.block_user.delete
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+    post:
+      tags:
+        - chat
+      summary: chat.block_user.post
+      operationId: chat.block_user.post
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  '/v1/chat/@me/block_list/{targetID}':
+    delete:
+      tags:
+        - chat
+      summary: chat.unblock_user
+      operationId: chat.unblock_user
+      parameters:
+        - name: targetID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  /v1/chat/@me/privacy_settings:
+    get:
+      tags:
+        - chat
+      summary: chat.get_set_privacy_settings.get
+      operationId: chat.get_set_privacy_settings.get
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+    post:
+      tags:
+        - chat
+      summary: chat.get_set_privacy_settings.post
+      operationId: chat.get_set_privacy_settings.post
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  /v1/permissions/@me/teams:
+    get:
+      tags:
+        - perm
+      summary: perm.get_user_teams
+      operationId: perm.get_user_teams
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  '/v1/permissions/{creatorID}/team/{userID}':
+    delete:
+      tags:
+        - perm
+      summary: perm.manage_user_from_team.delete
+      operationId: perm.manage_user_from_team.delete
+      parameters:
+        - name: creatorID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+        - name: userID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+    post:
+      tags:
+        - perm
+      summary: perm.manage_user_from_team.post
+      operationId: perm.manage_user_from_team.post
+      parameters:
+        - name: creatorID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+        - name: userID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  '/v1/permissions/{creatorID}/team/accept_invite':
+    get:
+      tags:
+        - perm
+      summary: perm.accept_invite_user_to_team
+      operationId: perm.accept_invite_user_to_team
+      parameters:
+        - name: creatorID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  '/v1/permissions/@me/team/{userID}/invite':
+    get:
+      tags:
+        - perm
+      summary: perm.invite_user_to_team.get
+      operationId: perm.invite_user_to_team.get
+      parameters:
+        - name: userID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+    post:
+      tags:
+        - perm
+      summary: perm.invite_user_to_team.post
+      operationId: perm.invite_user_to_team.post
+      parameters:
+        - name: userID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  /v1/permissions/@me/team/search:
+    get:
+      tags:
+        - perm
+      summary: perm.search_for_users
+      operationId: perm.search_for_users
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  /v1/permissions/@me/team:
+    get:
+      tags:
+        - perm
+      summary: perm.manage_creator_team
+      operationId: perm.manage_creator_team
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  '/v1/permissions/@me/roles/{roleID}':
+    delete:
+      tags:
+        - perm
+      summary: perm.manage_creator_role.delete
+      operationId: perm.manage_creator_role.delete
+      parameters:
+        - name: roleID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+    post:
+      tags:
+        - perm
+      summary: perm.manage_creator_role.post
+      operationId: perm.manage_creator_role.post
+      parameters:
+        - name: roleID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  /v1/permissions/@me/roles:
+    get:
+      tags:
+        - perm
+      summary: perm.manage_creator_roles.get
+      operationId: perm.manage_creator_roles.get
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+    post:
+      tags:
+        - perm
+      summary: perm.manage_creator_roles.post
+      operationId: perm.manage_creator_roles.post
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  /v1/permissions/@me/roles/positions:
+    get:
+      tags:
+        - perm
+      summary: perm.manage_role_positions.get
+      operationId: perm.manage_role_positions.get
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+    post:
+      tags:
+        - perm
+      summary: perm.manage_role_positions.post
+      operationId: perm.manage_role_positions.post
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  '/v1/comments/{postID}/comment/{commentID}/replies':
+    get:
+      tags:
+        - comments
+      summary: comments.manage_comment_replies.get
+      operationId: comments.manage_comment_replies.get
+      parameters:
+        - name: postID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+        - name: commentID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+    post:
+      tags:
+        - comments
+      summary: comments.manage_comment_replies.post
+      operationId: comments.manage_comment_replies.post
+      parameters:
+        - name: postID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+        - name: commentID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  '/v1/comments/{postID}/comment/{commentID}/replies/stats':
+    get:
+      tags:
+        - comments
+      summary: comments.replies_stats.get
+      operationId: comments.replies_stats.get
+      parameters:
+        - name: postID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+        - name: commentID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+    post:
+      tags:
+        - comments
+      summary: comments.replies_stats.post
+      operationId: comments.replies_stats.post
+      parameters:
+        - name: postID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+        - name: commentID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  '/v1/comments/{postID}/comment/{commentID}':
+    delete:
+      tags:
+        - comments
+      summary: comments.manage_comment.delete
+      operationId: comments.manage_comment.delete
+      parameters:
+        - name: postID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+        - name: commentID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+    post:
+      tags:
+        - comments
+      summary: comments.manage_comment.post
+      operationId: comments.manage_comment.post
+      parameters:
+        - name: postID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+        - name: commentID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  '/v1/comments/{postID}':
+    get:
+      tags:
+        - comments
+      summary: comments.manage_comments.get
+      operationId: comments.manage_comments.get
+      parameters:
+        - name: postID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+    post:
+      tags:
+        - comments
+      summary: comments.manage_comments.post
+      operationId: comments.manage_comments.post
+      parameters:
+        - name: postID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  /v1/notifications/@me/auth:
+    get:
+      tags:
+        - notifications
+      summary: notifications.set_user_key
+      operationId: notifications.set_user_key
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  '/v1/notifications/{notifID}/read':
+    post:
+      tags:
+        - notifications
+      summary: notifications.set_read
+      operationId: notifications.set_read
+      parameters:
+        - name: notifID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  /v1/notifications/@me:
+    get:
+      tags:
+        - notifications
+      summary: notifications.get_notifications
+      operationId: notifications.get_notifications
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  /v1/notifications/@me/unread_count:
+    get:
+      tags:
+        - notifications
+      summary: notifications.get_recent_notifs
+      operationId: notifications.get_recent_notifs
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+      deprecated: false
+  /v1/payments/@me/statistics:
+    get:
+      tags:
+        - payments
+      summary: payments.payment_stats
+      description: Get the monthly stats for the user.
+      operationId: payments.payment_stats
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/payments.payment_statsResponse'
+              example:
+                success: true
+                total: 5
+                sponsorships: 1
+                due: 1
+                sponsoring: 1
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+      deprecated: false
+  '/v1/payments/{userID}/tiers':
+    get:
+      tags:
+        - payments
+      summary: payments.get_user_tiers
+      description: 'Gets the creators tiers for display on the front end. If you want to edit tiers, use /payments/@me/tiers.'
+      operationId: payments.get_user_tiers
+      parameters:
+        - name: userID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/payments.get_user_tiersResponse'
+              example:
+                success: true
+                tiers:
+                  - _id: 1732814647763013600
+                    title: 'Sponsor Sponsus!'
+                    price: 5
+                    description: |-
+                      Testing tier for content and such
+
+                      **Rewards**
+                      * Cool role on our **Discord**
+                      * Hugs from me <3
+                    userID: 1729788214794915800
+                    advanced:
+                      limit:
+                        enabled: true
+                        max: 6
+                      discord_role:
+                        name: Writing Team
+                        id: 622152828831662100
+                    created_at: 1556109440
+      deprecated: false
+  '/v1/payments/{userID}/tiers/{tierID}':
+    get:
+      tags:
+        - payments
+      summary: payments.get_tier.get
+      description: Get a single tier
+      operationId: payments.get_tier.get
+      parameters:
+        - name: userID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+        - name: tierID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/payments.get_tier.getResponse'
+        '404':
+          description: The requested tier does not exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+      deprecated: false
+  '/v1/payments/{userID}/tiers/{tierID}/remaining_slots':
+    get:
+      tags:
+        - payments
+      summary: payments.get_tier
+      description: Tells you how many slots are open for sponsorships. Used in the UI to show how many are left.
+      operationId: payments.get_tier
+      parameters:
+        - name: userID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+        - name: tierID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/payments.get_tierResponse'
+              example:
+                success: true
+                total_left: 5
+        '400':
+          description: Tier is not limited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '404':
+          description: Tier was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+      deprecated: false
+  /v1/payments/@me/supporting:
+    get:
+      tags:
+        - payments
+      summary: payments.get_user_supporting
+      description: Requires payments.sponsoring.read
+      operationId: payments.get_user_supporting
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/payments.get_user_supportingResponse'
+      deprecated: false
+  '/v1/payments/{userID}/sponsoring':
+    get:
+      tags:
+        - payments
+      summary: payments.get_user_sponsoring_status
+      description: |-
+        Gets an IncomingSponsorship object if the target user is sponsoring you.
+
+        Requires payments.sponsorships.read
+        **(Sponsorships and sponsoring are two different permissions!!)**
+      operationId: payments.get_user_sponsoring_status
+      parameters:
+        - name: userID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/payments.get_user_sponsoring_statusResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+      deprecated: false
+  '/v1/payments/{userID}/donations/settings':
+    get:
+      tags:
+        - payments
+      summary: payments.set_donation_settings
+      description: Get a creators donation settings
+      operationId: payments.set_donation_settings
+      parameters:
+        - name: userID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/payments.set_donation_settingsResponse'
+              example:
+                success: true
+                enabled: true
+                length: 1month
+                limit: Thu 13/02/2020
+                social_media_image: 'https://cdn.ceru.tech/sponsus/1729788214794915840/1736565642238234624.png'
+        '404':
+          description: User does not exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+      deprecated: false
+  /v1/payments/@me/charges:
+    get:
+      tags:
+        - payments
+      summary: payments.get_charges
+      description: Requires payments.charges.read
+      operationId: payments.get_charges
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/payments.get_chargesResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
+      deprecated: false
+components:
+  schemas:
+    Profile:
+      title: Profile
+      type: object
+      properties:
+        _id:
+          type: string
+        about:
+          type: string
+        status:
+          type: string
+        theme:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+          description: ''
+        is_nsfw:
+          type: string
+        cards:
+          type: array
+          items:
+            type: object
+          description: ''
+        nickname:
+          type: string
+        username:
+          type: string
+      description: A profile object used to describe a creator.
+    ProfileCard:
+      title: ProfileCard
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        image:
+          type: string
+        link:
+          type: string
+    APIError:
+      title: APIError
+      type: object
+      properties:
+        success:
+          type: boolean
+        error:
+          type: string
+        code:
+          type: string
+    APIBasicSuccess:
+      title: APIBasicSuccess
+      type: object
+      properties:
+        success:
+          type: boolean
+    Tier:
+      title: Tier
+      required:
+        - _id
+        - title
+        - price
+        - description
+        - userID
+      type: object
+      properties:
+        _id:
+          type: string
+        title:
+          type: string
+        price:
+          type: number
+        description:
+          type: string
+        userID:
+          type: string
+        advanced:
+          type: object
+        created_at:
+          type: number
+        support:
+          $ref: '#/components/schemas/Support'
+      description: A tier for a creator.
+    APIKeyNoPermissions:
+      title: APIKeyNoPermissions
+      type: object
+      properties:
+        success:
+          type: string
+        error:
+          type: string
+        code:
+          type: string
+        missing_permission:
+          type: string
+      description: This is where the API cannot fulfil the request due to the API key not having the correct permissions.
+    Sponsorship:
+      title: Sponsorship
+      type: object
+      properties:
+        tier:
+          $ref: '#/components/schemas/Tier'
+        price:
+          type: number
+        owner:
+          $ref: '#/components/schemas/Profile'
+        is_active:
+          type: boolean
+        is_custom:
+          type: boolean
+        charge_amount:
+          type: number
+    IncomingSponsorship:
+      title: IncomingSponsorship
+      required:
+        - userID
+        - created_at
+        - is_active
+        - targetID
+        - has_paid
+        - current_month
+      type: object
+      properties:
+        userID:
+          type: string
+        created_at:
+          type: number
+        is_active:
+          type: boolean
+        targetID:
+          type: string
+        tier:
+          $ref: '#/components/schemas/Tier'
+        has_paid:
+          type: boolean
+        current_month:
+          type: string
+        is_custom:
+          type: boolean
+        active_total:
+          type: number
+        active_sponsorship_total:
+          type: number
+      description: Slightly different to the standard sponsorship object. Needs more information and doesnt need to provide creator context (since the person calling the route is the creator)
+    Charge:
+      title: Charge
+      required:
+        - _id
+        - amount
+        - created_at
+        - avalible_at
+      type: object
+      properties:
+        _id:
+          type: string
+        amount:
+          type: string
+        destination:
+          $ref: '#/components/schemas/BasicUser'
+        created_at:
+          type: string
+        avalible_at:
+          type: string
+        user:
+          $ref: '#/components/schemas/BasicUser'
+        type:
+          type: string
+        avalible_percent:
+          type: string
+        created_at_stamp:
+          type: string
+    BasicUser:
+      title: BasicUser
+      type: object
+      properties:
+        _id:
+          type: string
+        username:
+          type: string
+      description: This is a shortform User object
+    payments.get_chargesResponse:
+      title: payments.get_chargesResponse
+      type: object
+      properties:
+        success:
+          type: string
+        charges:
+          type: array
+          items:
+            $ref: '#/components/schemas/Charge'
+          description: ''
+    payments.get_tier.getResponse:
+      title: payments.get_tier.getResponse
+      type: object
+      properties:
+        success:
+          type: string
+        tier:
+          $ref: '#/components/schemas/Tier'
+    payments.get_tierResponse:
+      title: payments.get_tierResponse
+      type: object
+      properties:
+        success:
+          type: boolean
+        total_left:
+          type: number
+          description: How many sponsorship slots are left before no more can be added.
+    payments.get_user_sponsoring_statusResponse:
+      title: payments.get_user_sponsoring_statusResponse
+      type: object
+      properties:
+        success:
+          type: boolean
+        sponsorship:
+          $ref: '#/components/schemas/IncomingSponsorship'
+    payments.get_user_supportingResponse:
+      title: payments.get_user_supportingResponse
+      type: object
+      properties:
+        success:
+          type: string
+        supporting:
+          type: array
+          items:
+            $ref: '#/components/schemas/Sponsorship'
+          description: ''
+    payments.get_user_tiersResponse:
+      title: payments.get_user_tiersResponse
+      type: object
+      properties:
+        success:
+          type: string
+        tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tier'
+          description: ''
+    payments.manage_tiers.getResponse:
+      title: payments.manage_tiers.getResponse
+      type: object
+      properties:
+        success:
+          type: boolean
+        tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tier'
+          description: ''
+    payments.manage_tiers.postResponse:
+      title: payments.manage_tiers.postResponse
+      type: object
+      properties:
+        success:
+          type: boolean
+        tier:
+          $ref: '#/components/schemas/Tier'
+    payments.payment_statsResponse:
+      title: payments.payment_statsResponse
+      type: object
+      properties:
+        success:
+          type: string
+          description: 'Beep!'
+        total:
+          type: number
+          description: Amount given to this user per month from sponsors
+        due:
+          type: number
+          description: How much this user must pay each month
+        sponsorships:
+          type: number
+          description: How many creators this user is sponsoring
+        sponsors:
+          type: number
+          description: How many people are sponsoring this creator
+    payments.set_donation_settingsResponse:
+      title: payments.set_donation_settingsResponse
+      type: object
+      properties:
+        success:
+          type: boolean
+        enabled:
+          type: boolean
+        length:
+          type: string
+        limit:
+          type: string
+        social_media_image:
+          type: string
+    profile.calc_per_month.getResponse:
+      title: profile.calc_per_month.getResponse
+      required:
+        - success
+      type: object
+      properties:
+        success:
+          type: string
+        sponsors:
+          type: number
+          description: How many sponsorships does this creator have
+        total:
+          type: number
+          description: 'How much, in $, does this creator get'
+    profile.get_post_tagsResponse:
+      title: profile.get_post_tagsResponse
+      type: object
+      properties:
+        success:
+          type: string
+        tags:
+          type: array
+          items:
+            type: array
+            items:
+              type: string
+    profile.get_post_totalResponse:
+      title: profile.get_post_totalResponse
+      type: object
+      properties:
+        success:
+          type: string
+        total:
+          type: number
+    profile.get_set_user_profile.getResponse:
+      title: profile.get_set_user_profile.getResponse
+      type: object
+      properties:
+        success:
+          type: string
+        profile:
+          $ref: '#/components/schemas/Profile'
+    profile.get_user_avatar_infoResponse:
+      title: profile.get_user_avatar_infoResponse
+      type: object
+      properties:
+        success:
+          type: boolean
+        is_image:
+          type: string
+        key:
+          type: string
+    profile.get_user_profileResponse:
+      title: profile.get_user_profileResponse
+      type: object
+      properties:
+        success:
+          type: string
+        profile:
+          $ref: '#/components/schemas/Profile'
+    Support:
+      title: Support
+      type: object
+      properties:
+        is_supporting:
+          type: boolean
+    updates:
+      title: updates
+      type: object
+      properties:
+        username:
+          type: string
+        view_nsfw:
+          type: boolean
+  securitySchemes:
+    API key:
+      type: apiKey
+      description: |-
+        This is the header that allows you to login as a user. Please only use API keys for this. Your account will be disabled if you use your login token for API access.
+
+        If there is something you want access but its not avalible via API keys, please contact us at developers@sponsus.org
+      name: Authorization
+      in: header
+security:
+  - idk: []
+tags:
+  - name: authentication
+  - name: pay
+  - name: profile
+  - name: oauth
+  - name: posts
+  - name: files
+  - name: webhooks
+  - name: events
+  - name: search
+  - name: seo
+  - name: integrations
+  - name: admin
+  - name: feed
+  - name: comm
+  - name: chat
+  - name: perm
+  - name: comments
+  - name: emoji
+  - name: notifications
+  - name: redash
+  - name: dev
+  - name: payments
+    description: ''
