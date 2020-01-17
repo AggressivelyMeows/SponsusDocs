@@ -50,7 +50,7 @@ paths:
   /v1/payments/@me/tiers:
     post:
       tags:
-        - pay
+        - payments
       summary: Create a new tier
       description: Requires payments.tiers.write
       operationId: payments.manage_tiers.post
@@ -1333,54 +1333,107 @@ paths:
       description: Requires files.manage_files.write
       security:
         - API key: []
-  /v1/events/@me:
-    get:
-      tags:
-        - events
-      summary: events.get_events
-      operationId: events.get_events
-      parameters: []
-      responses:
-        '200':
-          description: OK
-          headers: {}
-      deprecated: false
   /v1/search/@me/sponsors:
-    post:
-      tags:
-        - search
-      summary: search.search_sponsors.post
-      operationId: search.search_sponsors.post
-      parameters: []
-      responses:
-        '200':
-          description: OK
-          headers: {}
-      deprecated: false
-  /v1/search/@me/total_sponsors:
     get:
-      tags:
-        - search
-      summary: search.search_sponsors
-      operationId: search.search_sponsors
-      parameters: []
+      summary: List sponsors
+      operationId: payments.list_sponsors
       responses:
         '200':
           description: OK
-          headers: {}
-      deprecated: false
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        username:
+                          type: string
+                        _id:
+                          type: string
+                        cards:
+                          type: array
+                          items:
+                            $ref: '#/components/schemas/ProfileCard'
+                        nickname:
+                          type: string
+                        status:
+                          type: string
+                        theme:
+                          type: string
+                        about:
+                          type: string
+                        description:
+                          type: string
+                        created_at:
+                          type: string
+                        tier:
+                          $ref: '#/components/schemas/Tier'
+                        total:
+                          type: number
+                          description: Total this user has sponsored THIS MONTH.
+                        lifetime:
+                          type: number
+                          description: Collective total of all sponsorships this user has paid towards you.
+      security:
+        - API key: []
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: tier
+          description: The tierID that you wish to filter results from. If present and `tier_only` is not/is false then the price of the tier will be used as a filter instead.
+        - schema:
+            type: string
+          in: query
+          name: username
+          description: The username you wish to filter for
+        - schema:
+            type: string
+          in: query
+          name: paid_only
+          description: Only returns results for users who have paid in the last month
+        - schema:
+            type: string
+          in: query
+          name: tier_only
+          description: Only returns results for users who are sponsoring a tier
+      description: List all of your sponsors as well as filter them.
   /v1/search:
     get:
       tags:
         - search
-      summary: search.search
-      operationId: search.search
+      summary: Search users
+      operationId: search.search_users
       parameters: []
       responses:
         '200':
           description: OK
           headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Profile'
+        '400':
+          description: 'You need to give a query to search with! (try ?q=Ceru to search for the founder of Sponsus!)'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
       deprecated: false
+      description: ''
   '/v1/integrations/discord/{userID}/settings':
     get:
       tags:
@@ -2463,7 +2516,7 @@ paths:
     get:
       tags:
         - payments
-      summary: payments.get_user_sponsoring_status
+      summary: Check sponsorship
       description: |-
         Gets an IncomingSponsorship object if the target user is sponsoring you.
 
