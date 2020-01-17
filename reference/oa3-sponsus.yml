@@ -1198,16 +1198,109 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/APIBasicSuccess'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
       deprecated: false
       security:
         - API key: []
       description: Delete a secret key
+  /v1/files/@me:
+    get:
+      tags:
+        - files
+      summary: List all files
+      operationId: files.list_files
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: string
+                  files:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/File'
+                  total:
+                    type: number
+                  total_human:
+                    type: string
+              examples:
+                Example: {}
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
+      deprecated: false
+      security:
+        - API key: []
+      description: Requires files.manage_files.read
+    post:
+      tags:
+        - files
+      summary: Upload a new file
+      operationId: files.upload_file
+      parameters: []
+      responses:
+        '201':
+          description: Returns the newly uploaded file in url form.
+          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  file:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
+        '507':
+          description: Not enough space on your CDN to upload a new file
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+      deprecated: false
+      description: Requires files.manage_files.write
+      security:
+        - API key: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              format: binary
+              properties:
+                file:
+                  type: string
+                  format: binary
+        description: 'Set the file param to the file you want to upload. Must be a binary file, not base64 encoded!!'
   '/v1/files/@me/{fileID}':
     delete:
       tags:
         - files
-      summary: files.manage_file
-      operationId: files.manage_file
+      summary: Delete a file
+      operationId: files.delete_file
       parameters:
         - name: fileID
           in: path
@@ -1218,32 +1311,28 @@ paths:
             type: string
       responses:
         '200':
-          description: OK
+          description: Deleted the file
           headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIBasicSuccess'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
+        '404':
+          description: The requested file does not exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
       deprecated: false
-  /v1/files/@me:
-    get:
-      tags:
-        - files
-      summary: files.manage_files.get
-      operationId: files.manage_files.get
-      parameters: []
-      responses:
-        '200':
-          description: OK
-          headers: {}
-      deprecated: false
-    post:
-      tags:
-        - files
-      summary: files.manage_files.post
-      operationId: files.manage_files.post
-      parameters: []
-      responses:
-        '200':
-          description: OK
-          headers: {}
-      deprecated: false
+      description: Requires files.manage_files.write
+      security:
+        - API key: []
   /v1/events/@me:
     get:
       tags:
@@ -2977,6 +3066,26 @@ components:
           type: number
         views:
           type: number
+    File:
+      title: File
+      type: object
+      properties:
+        _id:
+          type: string
+        userID:
+          type: string
+        key:
+          type: string
+        hash:
+          type: string
+        filename:
+          type: string
+        filesize:
+          type: number
+        filesize_human:
+          type: string
+        created_at:
+          type: string
   securitySchemes:
     API key:
       type: apiKey
