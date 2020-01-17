@@ -1459,80 +1459,106 @@ paths:
                         - $ref: '#/components/schemas/Post'
                         - $ref: '#/components/schemas/LockedPost'
       deprecated: false
+      security:
+        - API key: []
   /v1/feed/@me/total:
     get:
       tags:
         - feed
-      summary: feed.get_total_post_count
+      summary: Get feed post count
       operationId: feed.get_total_post_count
       parameters: []
       responses:
         '200':
           description: OK
           headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  s:
+                    type: boolean
+                    description: Was the request successful or not
+                  t:
+                    type: number
+                    description: Number of posts in your feed
       deprecated: false
-  /v1/chat/search:
-    get:
-      tags:
-        - chat
-      summary: chat.search_for_users
-      operationId: chat.search_for_users
-      parameters: []
-      responses:
-        '200':
-          description: OK
-          headers: {}
-      deprecated: false
+      description: Used to check if the UI should update
+      security:
+        - API key: []
   /v1/chat/@me/new_conversation:
     post:
       tags:
         - chat
-      summary: chat.create_conversation
+      summary: Create a new conversation
       operationId: chat.create_conversation
       parameters: []
       responses:
         '200':
-          description: OK
+          description: Returns the newly created conversation
           headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: string
+                  conversation:
+                    $ref: '#/components/schemas/Conversation'
+        '403':
+          description: You or one of your target users has blocked you or you have blocked them
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '404':
+          description: 'One of the users in the array does not exist, please make sure that they do exist before requesting a conversation.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
       deprecated: false
-  '/v1/chat/{convoID}/members/{userID}':
-    delete:
-      tags:
-        - chat
-      summary: chat.remove_user
-      operationId: chat.remove_user
-      parameters:
-        - name: convoID
-          in: path
-          description: ''
-          required: true
-          style: simple
-          schema:
-            type: string
-        - name: userID
-          in: path
-          description: ''
-          required: true
-          style: simple
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          headers: {}
-      deprecated: false
+      description: ''
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                users:
+                  type: array
+                  description: 'An array of a single userID you wish to add. In future, we may allow bigger groups.'
+                  items:
+                    type: number
+      security:
+        - API key: []
   /v1/chat/@me/conversations:
     get:
       tags:
         - chat
-      summary: chat.get_conversations
+      summary: List active conversations
       operationId: chat.get_conversations
       parameters: []
       responses:
         '200':
           description: OK
           headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  conversations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Conversation'
       deprecated: false
+      security:
+        - API key: []
   '/v1/chat/{convoID}/rtm/start':
     get:
       tags:
@@ -1601,6 +1627,34 @@ paths:
           description: OK
           headers: {}
       deprecated: false
+  '/v1/chat/{convoID}/members/{userID}':
+    delete:
+      tags:
+        - chat
+      summary: Remove a user from the conversation
+      operationId: chat.remove_user
+      parameters:
+        - name: convoID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+        - name: userID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      deprecated: false
+      description: '**This will not work as there is a max limit of users in a convo set to 2. If you want to close a DM for good then you must block the other user.**'
+      responses:
+        '501':
+          description: Not Implemented
+      security:
+        - API key: []
   '/v1/chat/{convoID}/messages/{messageID}':
     delete:
       tags:
@@ -3031,6 +3085,30 @@ components:
           type: string
         created_at:
           type: string
+    Conversation:
+      title: Conversation
+      type: object
+      properties:
+        _id:
+          type: string
+        users:
+          type: string
+        created_at:
+          type: string
+        userID:
+          type: array
+          description: Array of userIDs in the conversation
+          items:
+            type: number
+        is_direct_message:
+          type: boolean
+        title:
+          type: string
+        image:
+          type: string
+        is_active:
+          type: boolean
+      description: A conversation object for use in the chat system
   securitySchemes:
     API key:
       type: apiKey
