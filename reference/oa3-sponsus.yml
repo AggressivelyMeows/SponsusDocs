@@ -14,7 +14,7 @@ paths:
     post:
       tags:
         - authentication
-      summary: authentication.manage_user_account
+      summary: Update your account
       description: Update user account
       operationId: authentication.manage_user_account
       parameters: []
@@ -805,7 +805,7 @@ paths:
     get:
       tags:
         - posts
-      summary: posts.get_posts
+      summary: "Get a creator's posts"
       operationId: posts.get_posts
       parameters:
         - name: userID
@@ -819,12 +819,34 @@ paths:
         '200':
           description: OK
           headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: string
+                  posts:
+                    type: array
+                    items:
+                      anyOf:
+                        - $ref: '#/components/schemas/LockedPost'
+                        - $ref: '#/components/schemas/Post'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
       deprecated: false
+      security:
+        - API key: []
+      description: 'Gets a creators **public** posts.'
   '/v1/posts/{userID}/post/{postID}':
     get:
       tags:
         - posts
-      summary: posts.get_post.get
+      summary: Get a single post from a creator
       operationId: posts.get_post.get
       parameters:
         - name: userID
@@ -845,11 +867,29 @@ paths:
         '200':
           description: OK
           headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  post:
+                    oneOf:
+                      - $ref: '#/components/schemas/Post'
+                      - $ref: '#/components/schemas/LockedPost'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
       deprecated: false
+      description: ''
     delete:
       tags:
         - posts
-      summary: posts.get_post.delete
+      summary: Delete a post
       operationId: posts.get_post.delete
       parameters:
         - name: userID
@@ -870,11 +910,24 @@ paths:
         '200':
           description: OK
           headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIBasicSuccess'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
       deprecated: false
+      description: Requires posts.manage_posts.write
+      security:
+        - API key: []
     post:
       tags:
         - posts
-      summary: posts.get_post.post
+      summary: Update a post
       operationId: posts.get_post.post
       parameters:
         - name: userID
@@ -895,12 +948,90 @@ paths:
         '200':
           description: OK
           headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIBasicSuccess'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
       deprecated: false
+      description: Requires posts.manage_posts.write
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
+                  maxLength: 100000
+                price_to_view:
+                  type: string
+                audio:
+                  type: object
+                  properties:
+                    src:
+                      type: string
+                    cover_image:
+                      type: string
+                    background_image:
+                      type: string
+                    include_in_rss:
+                      type: string
+                    title:
+                      type: string
+                video:
+                  type: object
+                  properties:
+                    src:
+                      type: string
+                destination:
+                  type: string
+                  description: The user ID of where you want to send this post. Defaults to your account.
+                attachments:
+                  type: string
+                  maxLength: 20
+                tags:
+                  type: string
+                is_hidden:
+                  type: string
+                nsfw:
+                  type: string
+                image:
+                  type: object
+                  properties:
+                    src:
+                      type: array
+                      items:
+                        type: string
+                publish_at:
+                  type: string
+                  description: 'If included, must be a UTC ISO formatted datetime string. For example: 2020-01-21T00:00:00.000Z'
+                  format: date-time
+                showing:
+                  type: string
+                type:
+                  type: string
+                  description: 'Must be either text, video, audio, or image'
+              required:
+                - title
+                - content
+                - price_to_view
+                - type
+        description: 'If you set the type to something other than text, then the corresponding object must be included! If type is audio, for example, then the audio object **must** be present.'
+      security:
+        - API key: []
   '/v1/posts/{userID}/post/{postID}/publish':
     post:
       tags:
         - posts
-      summary: posts.publish_post
+      summary: Publish a post
       operationId: posts.publish_post
       parameters:
         - name: userID
@@ -921,13 +1052,32 @@ paths:
         '200':
           description: OK
           headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIBasicSuccess'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
+        '404':
+          description: The requested post does not exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
       deprecated: false
+      security:
+        - API key: []
+      description: 'Publishes a previously hidden post for viewing by either sponsors or the public. This will trigger all after-publish hooks such as notifications. **This can only be done once per post and is not reversable.**'
   '/v1/posts/@me/post/{postID}/secret_keys':
     get:
       tags:
         - posts
-      summary: posts.get_post_secret_keys.get
-      operationId: posts.get_post_secret_keys.get
+      summary: "List a post's secret keys"
+      operationId: posts.list_secret_keys
       parameters:
         - name: postID
           in: path
@@ -940,30 +1090,26 @@ paths:
         '200':
           description: OK
           headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  keys:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SecretKey'
       deprecated: false
-    delete:
-      tags:
-        - posts
-      summary: posts.get_post_secret_keys.delete
-      operationId: posts.get_post_secret_keys.delete
-      parameters:
-        - name: postID
-          in: path
-          description: ''
-          required: true
-          style: simple
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          headers: {}
-      deprecated: false
+      description: Requires posts.secret_keys.read
+      security:
+        - API key: []
     post:
       tags:
         - posts
-      summary: posts.get_post_secret_keys.post
-      operationId: posts.get_post_secret_keys.post
+      summary: Create a new secret key
+      operationId: posts.create_secret_key
       parameters:
         - name: postID
           in: path
@@ -974,15 +1120,61 @@ paths:
             type: string
       responses:
         '200':
-          description: OK
+          description: Returns the newly created key
           headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  key:
+                    $ref: '#/components/schemas/SecretKey'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
       deprecated: false
+      description: Requires posts.secret_keys.write
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                uses:
+                  type: number
+                expires_at:
+                  type: string
+                  format: date-time
+              required:
+                - name
+                - uses
+                - expires_at
+          application/xml:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                uses:
+                  type: string
+                expires_at:
+                  type: string
+        description: ''
+      security:
+        - API key: []
   '/v1/posts/@me/post/{postID}/secret_keys/{keyID}':
     delete:
       tags:
         - posts
-      summary: posts.delete_post_secret_keys
-      operationId: posts.delete_post_secret_keys
+      summary: Delete a secret key
+      operationId: posts.delete_secret_key
       parameters:
         - name: postID
           in: path
@@ -1000,9 +1192,16 @@ paths:
             type: string
       responses:
         '200':
-          description: OK
+          description: The key is deleted
           headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIBasicSuccess'
       deprecated: false
+      security:
+        - API key: []
+      description: Delete a secret key
   '/v1/files/@me/{fileID}':
     delete:
       tags:
@@ -2649,6 +2848,135 @@ components:
           type: string
         view_nsfw:
           type: boolean
+    Post:
+      title: Post
+      type: object
+      description: 'Fields with _str are from an old converter that ensures that the front end can read these fields. Please ignore them and use the normal fields! <3'
+      properties:
+        _id:
+          type: string
+        _id_str:
+          type: string
+        title_slug:
+          type: string
+        type:
+          type: string
+        title:
+          type: string
+        price_to_view:
+          type: number
+        authorID_str:
+          type: string
+        authorID:
+          type: string
+        userID_str:
+          type: string
+        userID:
+          type: string
+        created_at:
+          type: number
+        published_at:
+          type: number
+        is_nsfw:
+          type: boolean
+        is_hidden:
+          type: boolean
+        tags:
+          type: array
+          items:
+            type: string
+        comment_count:
+          type: number
+        can_edit:
+          type: boolean
+        content:
+          type: string
+        images:
+          type: array
+          items:
+            type: string
+        audio:
+          type: object
+          properties:
+            src:
+              type: string
+            cover_image:
+              type: string
+            background_image:
+              type: string
+            include_in_rss:
+              type: string
+            title:
+              type: string
+        video:
+          type: string
+    LockedPost:
+      type: object
+      title: LockedPost
+      properties:
+        _id:
+          type: string
+        _id_str:
+          type: string
+        title_slug:
+          type: string
+        type:
+          type: string
+        title:
+          type: string
+        price_to_view:
+          type: number
+        authorID_str:
+          type: string
+        authorID:
+          type: string
+        userID_str:
+          type: string
+        userID:
+          type: string
+        created_at:
+          type: number
+        published_at:
+          type: number
+        is_nsfw:
+          type: boolean
+        is_hidden:
+          type: boolean
+        tags:
+          type: array
+          items:
+            type: string
+        comment_count:
+          type: number
+        can_edit:
+          type: boolean
+        locked:
+          type: number
+        payment_error:
+          type: string
+    SecretKey:
+      title: SecretKey
+      type: object
+      description: A secret key used to view posts
+      properties:
+        _id:
+          type: string
+        authorID:
+          type: string
+        name:
+          type: string
+        postID:
+          type: string
+        code:
+          type: string
+        uses:
+          type: number
+        expires_at:
+          type: number
+        created_at:
+          type: number
+        views:
+          type: number
   securitySchemes:
     API key:
       type: apiKey
