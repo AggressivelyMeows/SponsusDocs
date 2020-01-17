@@ -1434,138 +1434,30 @@ paths:
                 $ref: '#/components/schemas/APIError'
       deprecated: false
       description: ''
-  '/v1/integrations/discord/{userID}/settings':
-    get:
-      tags:
-        - integrations
-      summary: integrations.get_set_discord_settings.get
-      operationId: integrations.get_set_discord_settings.get
-      parameters:
-        - name: userID
-          in: path
-          description: ''
-          required: true
-          style: simple
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          headers: {}
-      deprecated: false
-    post:
-      tags:
-        - integrations
-      summary: integrations.get_set_discord_settings.post
-      operationId: integrations.get_set_discord_settings.post
-      parameters:
-        - name: userID
-          in: path
-          description: ''
-          required: true
-          style: simple
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          headers: {}
-      deprecated: false
-  '/v1/integrations/{userID}/discord/invite':
-    get:
-      tags:
-        - integrations
-      summary: integrations.get_discord_invite
-      operationId: integrations.get_discord_invite
-      parameters:
-        - name: userID
-          in: path
-          description: ''
-          required: true
-          style: simple
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          headers: {}
-      deprecated: false
-  '/v1/integrations/{userID}/discord/server':
-    get:
-      tags:
-        - integrations
-      summary: integrations.get_discord_server
-      operationId: integrations.get_discord_server
-      parameters:
-        - name: userID
-          in: path
-          description: ''
-          required: true
-          style: simple
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          headers: {}
-      deprecated: false
-  /v1/integrations/discord/roles:
-    get:
-      tags:
-        - integrations
-      summary: integrations.get_discord_roles
-      operationId: integrations.get_discord_roles
-      parameters: []
-      responses:
-        '200':
-          description: OK
-          headers: {}
-      deprecated: false
-  /v1/integrations/discord:
-    get:
-      tags:
-        - integrations
-      summary: integrations.manage_discord_integration.get
-      operationId: integrations.manage_discord_integration.get
-      parameters: []
-      responses:
-        '200':
-          description: OK
-          headers: {}
-      deprecated: false
-    delete:
-      tags:
-        - integrations
-      summary: integrations.manage_discord_integration.delete
-      operationId: integrations.manage_discord_integration.delete
-      parameters: []
-      responses:
-        '200':
-          description: OK
-          headers: {}
-      deprecated: false
-    post:
-      tags:
-        - integrations
-      summary: integrations.manage_discord_integration.post
-      operationId: integrations.manage_discord_integration.post
-      parameters: []
-      responses:
-        '200':
-          description: OK
-          headers: {}
-      deprecated: false
   /v1/feed/@me:
     get:
       tags:
         - feed
-      summary: feed.get_feed
+      summary: List all posts from your sponsorships
       operationId: feed.get_feed
       parameters: []
       responses:
         '200':
           description: OK
           headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: string
+                  posts:
+                    type: array
+                    items:
+                      oneOf:
+                        - $ref: '#/components/schemas/Post'
+                        - $ref: '#/components/schemas/LockedPost'
       deprecated: false
   /v1/feed/@me/total:
     get:
