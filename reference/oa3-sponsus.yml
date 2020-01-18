@@ -4,11 +4,12 @@ info:
   contact:
     name: Sponsus
     email: developers@sponsus.org
-  version: 1.0.0
-  description: API spec for sponsus.org
+  version: 1.0.1
+  description: API spec for api.sponsus.org
 servers:
   - url: 'https://api-dev.sponsus.org'
     variables: {}
+    description: Dev server
 paths:
   /v1/auth/@me:
     post:
@@ -1563,8 +1564,8 @@ paths:
     get:
       tags:
         - chat
-      summary: chat.create_rtm_link
-      operationId: chat.create_rtm_link
+      summary: Create RTM url
+      operationId: chat.create_conversation_rtm_url
       parameters:
         - name: convoID
           in: path
@@ -1575,26 +1576,64 @@ paths:
             type: string
       responses:
         '200':
-          description: OK
+          description: 'The base URL for the RTM session is given below. This can be used to watch for new messages by going to <base_url>/messages. This url only supports WSS connections!'
           headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  rtm:
+                    type: object
+                    properties:
+                      base_url:
+                        type: string
       deprecated: false
+      description: |-
+        Requires chat.live_messages.read
+
+        An RTM url allows you to listen in on any conversation that you have access to. Just request it, and connect to the provided url via a WebSocket within 1 minute.
+      security:
+        - API key: []
   /v1/chat/@me/rtm/unread/start:
     get:
       tags:
         - chat
-      summary: chat.create_notice_rtm_link
-      operationId: chat.create_notice_rtm_link
+      summary: Create unread notifications RTM URL
+      operationId: chat.create_message_notifications_url
       parameters: []
       responses:
         '200':
-          description: OK
+          description: Returns a valid WebSocket URL for listening to unread message events.
           headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: string
+                  rtm:
+                    type: object
+                    properties:
+                      base_url:
+                        type: string
       deprecated: false
+      description: |-
+        Requires chat.manage_messages.read
+
+        Creates a unread message notification RTM link which allows you to listen for new messages for all conversations, including ones that get made after the url's creation.
+
+        Unlike the conversation RTM link, this one is just a simple "plug the url into a websocket and go" type deal.
+      security:
+        - API key: []
   '/v1/chat/{convoID}/messages':
     get:
       tags:
         - chat
-      summary: chat.manage_messages.get
+      summary: "List a conversation's messages"
       operationId: chat.manage_messages.get
       parameters:
         - name: convoID
@@ -1604,16 +1643,36 @@ paths:
           style: simple
           schema:
             type: string
+        - schema:
+            type: number
+          in: query
+          name: page
+          description: The page you want to pull from
       responses:
         '200':
-          description: OK
+          description: Returns the conversations messages sorted by creation. Use the page param to go back in history
           headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  messages:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ChatMessage'
+                  has_more:
+                    type: boolean
       deprecated: false
+      security:
+        - API key: []
     post:
       tags:
         - chat
-      summary: chat.manage_messages.post_
-      operationId: chat.manage_messages.post_
+      summary: Create a new message
+      operationId: chat.create_message
       parameters:
         - name: convoID
           in: path
@@ -1624,9 +1683,58 @@ paths:
             type: string
       responses:
         '200':
-          description: OK
+          description: Returns the new message
           headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    $ref: '#/components/schemas/ChatMessage'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
+        '403':
+          description: You do not have access rights to this conversation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '404':
+          description: Conversation ID wasnt found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
       deprecated: false
+      description: |-
+        Requires chat.manage_messages.write
+
+        Creates a new message in the target conversation.
+      security:
+        - API key: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  minLength: 2
+                  maxLength: 1500
+                attachments:
+                  type: array
+                  maxItems: 5
+                  items:
+                    $ref: '#/components/schemas/Attachment'
+        description: ''
   '/v1/chat/{convoID}/members/{userID}':
     delete:
       tags:
@@ -1659,8 +1767,8 @@ paths:
     delete:
       tags:
         - chat
-      summary: chat.manage_message.delete
-      operationId: chat.manage_message.delete
+      summary: Delete a message
+      operationId: chat.delete_message
       parameters:
         - name: convoID
           in: path
@@ -1678,14 +1786,33 @@ paths:
             type: string
       responses:
         '200':
-          description: OK
+          description: Deleted the message
           headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIBasicSuccess'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
       deprecated: false
+      description: Requires chat.manage_messages.write
+      security:
+        - API key: []
     post:
       tags:
         - chat
-      summary: chat.manage_message.post
-      operationId: chat.manage_message.post
+      summary: Edit a message
+      operationId: chat.edit_message
       parameters:
         - name: convoID
           in: path
@@ -1703,9 +1830,51 @@ paths:
             type: string
       responses:
         '200':
-          description: OK
+          description: Updated the message
           headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIBasicSuccess'
+        '400':
+          description: 'There was an error while validating your input, please make sure that it is valid!'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
+        '403':
+          description: You dont have access rights to this message/convo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '404':
+          description: Conversation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
       deprecated: false
+      security:
+        - API key: []
+      description: Requires chat.manage_messages.write
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                attachments:
+                  $ref: '#/components/schemas/Attachment'
+        description: 'Only provide the fields you wish to update. You must, however, provide at least 1 field or it wont accept your request.'
   '/v1/chat/{convoID}/ack':
     post:
       tags:
@@ -3109,6 +3278,37 @@ components:
         is_active:
           type: boolean
       description: A conversation object for use in the chat system
+    Attachment:
+      title: Attachment
+      type: object
+      properties:
+        url:
+          type: string
+        filename:
+          type: string
+    ChatMessage:
+      title: ChatMessage
+      type: object
+      properties:
+        _id:
+          type: string
+        convoID:
+          type: string
+        userID:
+          type: string
+        content:
+          type: string
+        created_at:
+          type: number
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Attachment'
+        is_active:
+          type: boolean
+        is_unread:
+          type: boolean
+      description: ''
   securitySchemes:
     API key:
       type: apiKey
