@@ -91,7 +91,7 @@ paths:
                 $ref: '#/components/schemas/APIKeyNoPermissions'
       deprecated: false
       security:
-        - API key: []
+        - ApiKeyAuth: []
     get:
       tags:
         - payments
@@ -138,7 +138,7 @@ paths:
                 $ref: '#/components/schemas/APIKeyNoPermissions'
       deprecated: false
       security:
-        - API key: []
+        - ApiKeyAuth: []
   '/v1/payments/@me/tiers/{tierID}':
     delete:
       summary: Delete a tier
@@ -170,7 +170,7 @@ paths:
       tags:
         - payments
       security:
-        - API key: []
+        - ApiKeyAuth: []
     post:
       tags:
         - payments
@@ -244,7 +244,7 @@ paths:
                 $ref: '#/components/schemas/APIError'
       deprecated: false
       security:
-        - API key: []
+        - ApiKeyAuth: []
     parameters:
       - schema:
           type: string
@@ -494,13 +494,6 @@ paths:
       description: 'Returns an image suitable for your device (WebP for those who support it, PNG for those who cant)'
       operationId: profile.get_user_avatar_with_key.get
       parameters:
-        - name: userID
-          in: path
-          description: ''
-          required: true
-          style: simple
-          schema:
-            type: string
         - name: key
           in: path
           description: ''
@@ -522,11 +515,6 @@ paths:
     parameters:
       - schema:
           type: string
-        name: ''
-        in: path
-        required: true
-      - schema:
-          type: string
         name: key
         in: path
         required: true
@@ -539,6 +527,13 @@ paths:
       operationId: profile.avatar
       parameters:
         - name: userID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+        - name: key
           in: path
           description: ''
           required: true
@@ -689,7 +684,7 @@ paths:
                     $ref: '#/components/schemas/Profile'
       deprecated: false
       security:
-        - API key: []
+        - ApiKeyAuth: []
   /v1/posts/@me:
     post:
       tags:
@@ -798,7 +793,7 @@ paths:
                 - content
         description: 'If you set the type to something other than text, then the corresponding object must be included! If type is audio, for example, then the audio object **must** be present.'
       security:
-        - API key: []
+        - ApiKeyAuth: []
       description: Creates a new post
   '/v1/posts/{userID}':
     get:
@@ -839,7 +834,7 @@ paths:
                 $ref: '#/components/schemas/APIError'
       deprecated: false
       security:
-        - API key: []
+        - ApiKeyAuth: []
       description: 'Gets a creators **public** posts.'
   '/v1/posts/{userID}/post/{postID}':
     get:
@@ -922,7 +917,7 @@ paths:
       deprecated: false
       description: Requires posts.manage_posts.write
       security:
-        - API key: []
+        - ApiKeyAuth: []
     post:
       tags:
         - posts
@@ -1025,7 +1020,7 @@ paths:
                 - type
         description: 'If you set the type to something other than text, then the corresponding object must be included! If type is audio, for example, then the audio object **must** be present.'
       security:
-        - API key: []
+        - ApiKeyAuth: []
   '/v1/posts/{userID}/post/{postID}/publish':
     post:
       tags:
@@ -1069,7 +1064,7 @@ paths:
                 $ref: '#/components/schemas/APIError'
       deprecated: false
       security:
-        - API key: []
+        - ApiKeyAuth: []
       description: 'Publishes a previously hidden post for viewing by either sponsors or the public. This will trigger all after-publish hooks such as notifications. **This can only be done once per post and is not reversable.**'
   '/v1/posts/@me/post/{postID}/secret_keys':
     get:
@@ -1103,7 +1098,7 @@ paths:
       deprecated: false
       description: Requires posts.secret_keys.read
       security:
-        - API key: []
+        - ApiKeyAuth: []
     post:
       tags:
         - posts
@@ -1167,7 +1162,7 @@ paths:
                   type: string
         description: ''
       security:
-        - API key: []
+        - ApiKeyAuth: []
   '/v1/posts/@me/post/{postID}/secret_keys/{keyID}':
     delete:
       tags:
@@ -1205,7 +1200,7 @@ paths:
                 $ref: '#/components/schemas/APIKeyNoPermissions'
       deprecated: false
       security:
-        - API key: []
+        - ApiKeyAuth: []
       description: Delete a secret key
   /v1/files/@me:
     get:
@@ -1243,7 +1238,7 @@ paths:
                 $ref: '#/components/schemas/APIKeyNoPermissions'
       deprecated: false
       security:
-        - API key: []
+        - ApiKeyAuth: []
       description: Requires files.manage_files.read
     post:
       tags:
@@ -1282,7 +1277,7 @@ paths:
       deprecated: false
       description: Requires files.manage_files.write
       security:
-        - API key: []
+        - ApiKeyAuth: []
       requestBody:
         content:
           multipart/form-data:
@@ -1331,7 +1326,7 @@ paths:
       deprecated: false
       description: Requires files.manage_files.write
       security:
-        - API key: []
+        - ApiKeyAuth: []
   /v1/search/@me/sponsors:
     get:
       summary: List sponsors
@@ -1380,7 +1375,7 @@ paths:
                           type: number
                           description: Collective total of all sponsorships this user has paid towards you.
       security:
-        - API key: []
+        - ApiKeyAuth: []
       parameters:
         - schema:
             type: string
@@ -1459,7 +1454,7 @@ paths:
                         - $ref: '#/components/schemas/LockedPost'
       deprecated: false
       security:
-        - API key: []
+        - ApiKeyAuth: []
   /v1/feed/@me/total:
     get:
       tags:
@@ -1485,7 +1480,7 @@ paths:
       deprecated: false
       description: Used to check if the UI should update
       security:
-        - API key: []
+        - ApiKeyAuth: []
   /v1/chat/@me/new_conversation:
     post:
       tags:
@@ -1532,7 +1527,7 @@ paths:
                   items:
                     type: number
       security:
-        - API key: []
+        - ApiKeyAuth: []
   /v1/chat/@me/conversations:
     get:
       tags:
@@ -1557,7 +1552,7 @@ paths:
                       $ref: '#/components/schemas/Conversation'
       deprecated: false
       security:
-        - API key: []
+        - ApiKeyAuth: []
   '/v1/chat/{convoID}/rtm/start':
     get:
       tags:
@@ -1594,7 +1589,7 @@ paths:
 
         An RTM url allows you to listen in on any conversation that you have access to. Just request it, and connect to the provided url via a WebSocket within 1 minute.
       security:
-        - API key: []
+        - ApiKeyAuth: []
   /v1/chat/@me/rtm/unread/start:
     get:
       tags:
@@ -1626,7 +1621,7 @@ paths:
 
         Unlike the conversation RTM link, this one is just a simple "plug the url into a websocket and go" type deal.
       security:
-        - API key: []
+        - ApiKeyAuth: []
   '/v1/chat/{convoID}/messages':
     get:
       tags:
@@ -1665,7 +1660,7 @@ paths:
                     type: boolean
       deprecated: false
       security:
-        - API key: []
+        - ApiKeyAuth: []
     post:
       tags:
         - chat
@@ -1716,7 +1711,7 @@ paths:
 
         Creates a new message in the target conversation.
       security:
-        - API key: []
+        - ApiKeyAuth: []
       requestBody:
         content:
           application/json:
@@ -1760,7 +1755,7 @@ paths:
         '501':
           description: Not Implemented
       security:
-        - API key: []
+        - ApiKeyAuth: []
   '/v1/chat/{convoID}/messages/{messageID}':
     delete:
       tags:
@@ -1805,7 +1800,7 @@ paths:
       deprecated: false
       description: Requires chat.manage_messages.write
       security:
-        - API key: []
+        - ApiKeyAuth: []
     post:
       tags:
         - chat
@@ -1860,7 +1855,7 @@ paths:
                 $ref: '#/components/schemas/APIError'
       deprecated: false
       security:
-        - API key: []
+        - ApiKeyAuth: []
       description: Requires chat.manage_messages.write
       requestBody:
         content:
@@ -1916,7 +1911,7 @@ paths:
       deprecated: false
       description: Marks the messages as being read.
       security:
-        - API key: []
+        - ApiKeyAuth: []
       requestBody:
         content:
           application/json:
@@ -1952,7 +1947,7 @@ paths:
       deprecated: false
       description: Get unread count from all conversations
       security:
-        - API key: []
+        - ApiKeyAuth: []
   /v1/chat/@me/block_list:
     get:
       tags:
@@ -2023,7 +2018,7 @@ paths:
                 $ref: '#/components/schemas/APIKeyNoPermissions'
       deprecated: false
       security:
-        - API key: []
+        - ApiKeyAuth: []
       description: Requires chat.manage_blocklist.read
     post:
       tags:
@@ -2053,7 +2048,7 @@ paths:
                 $ref: '#/components/schemas/APIKeyNoPermissions'
       deprecated: false
       security:
-        - API key: []
+        - ApiKeyAuth: []
       description: Requires chat.manage_blocklist.write
       requestBody:
         content:
@@ -2107,7 +2102,7 @@ paths:
                 $ref: '#/components/schemas/APIKeyNoPermissions'
       deprecated: false
       security:
-        - API key: []
+        - ApiKeyAuth: []
   /v1/permissions/@me/teams:
     get:
       summary: Get my teams
@@ -2130,7 +2125,7 @@ paths:
                       $ref: '#/components/schemas/TeamMember'
       deprecated: false
       security:
-        - API key: []
+        - ApiKeyAuth: []
       description: Requires teams.teams.read
       tags:
         - teams
@@ -2175,7 +2170,7 @@ paths:
                 $ref: '#/components/schemas/APIError'
       deprecated: false
       security:
-        - API key: []
+        - ApiKeyAuth: []
       description: Requires teams.teams.write
       tags:
         - teams
@@ -2229,7 +2224,7 @@ paths:
 
         Update a members roles
       security:
-        - API key: []
+        - ApiKeyAuth: []
       requestBody:
         content:
           application/json:
@@ -2283,7 +2278,7 @@ paths:
       tags:
         - teams
       security:
-        - API key: []
+        - ApiKeyAuth: []
       description: Requires teams.teams.write
   '/v1/permissions/@me/team/{userID}/invite':
     post:
@@ -2327,7 +2322,7 @@ paths:
       tags:
         - teams
       security:
-        - API key: []
+        - ApiKeyAuth: []
       description: Requires teams.teams.write
       requestBody:
         content:
@@ -2390,7 +2385,7 @@ paths:
       tags:
         - teams
       security:
-        - API key: []
+        - ApiKeyAuth: []
       description: Requires teams.teams.read
   /v1/permissions/@me/team:
     get:
@@ -2423,7 +2418,7 @@ paths:
       deprecated: false
       description: Requires teams.teams.read
       security:
-        - API key: []
+        - ApiKeyAuth: []
   '/v1/permissions/@me/roles/{roleID}':
     delete:
       summary: Delete a role
@@ -2464,7 +2459,7 @@ paths:
                 $ref: '#/components/schemas/APIError'
       deprecated: false
       security:
-        - API key: []
+        - ApiKeyAuth: []
       tags:
         - teams
     post:
@@ -2506,7 +2501,7 @@ paths:
                 $ref: '#/components/schemas/APIError'
       deprecated: false
       security:
-        - API key: []
+        - ApiKeyAuth: []
       description: Requires teams.roles.write
       requestBody:
         content:
@@ -2556,7 +2551,7 @@ paths:
                 $ref: '#/components/schemas/APIKeyNoPermissions'
       deprecated: false
       security:
-        - API key: []
+        - ApiKeyAuth: []
       description: Requires teams.roles.read
     post:
       tags:
@@ -3711,13 +3706,14 @@ components:
         color:
           type: string
         userID:
+
           type: string
         created_at:
           type: string
         position:
           type: string
   securitySchemes:
-    API key:
+    ApiKeyAuth:
       type: apiKey
       description: |-
         This is the header that allows you to login as a user. Please only use API keys for this. Your account will be disabled if you use your login token for API access.
@@ -3725,8 +3721,6 @@ components:
         If there is something you want access but its not avalible via API keys, please contact us at developers@sponsus.org
       name: Authorization
       in: header
-security:
-  - idk: []
 tags:
   - name: authentication
   - name: profile
