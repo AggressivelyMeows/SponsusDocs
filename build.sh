@@ -1,3 +1,5 @@
+#!/use/bin/env bash
+
 # First we need to install all the requirements
 npm install -g widdershins
 gem install bundler
