@@ -1879,7 +1879,7 @@ paths:
     post:
       tags:
         - chat
-      summary: chat.manage_messages.post1
+      summary: Mark messages as reasd
       operationId: chat.manage_messages.post1
       parameters:
         - name: convoID
@@ -1893,58 +1893,191 @@ paths:
         '200':
           description: OK
           headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIBasicSuccess'
+        '401':
+          description: Unauthorized
+        '404':
+          description: One of the message IDs doesnt exist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  error:
+                    type: string
+                  code:
+                    type: string
+                  index:
+                    type: number
+                    description: Index of the message ID that doesnt exist
       deprecated: false
+      description: Marks the messages as being read.
+      security:
+        - API key: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                messages:
+                  type: array
+                  description: An array of messageIDs
+                  items:
+                    type: string
   /v1/chat/@me/unread:
     get:
       tags:
         - chat
-      summary: chat.manage_messages
-      operationId: chat.manage_messages
+      summary: Get all conversations unread count
+      operationId: chat.get_unread
       parameters: []
       responses:
         '200':
           description: OK
           headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: string
+                  unread:
+                    type: object
+                    description: 'OpenAPI doesnt allow for objects with dynamic keys. The keys in the object are "convoID:Unread count"'
       deprecated: false
+      description: Get unread count from all conversations
+      security:
+        - API key: []
   /v1/chat/@me/block_list:
     get:
       tags:
         - chat
-      summary: chat.block_user.get
-      operationId: chat.block_user.get
+      summary: Get block list
+      operationId: chat.block_list
       parameters: []
       responses:
         '200':
-          description: OK
+          description: ''
           headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: string
+                  block_list:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                        userID:
+                          type: string
+                        targetID:
+                          type: string
+                        created_at:
+                          type: string
+                        reason:
+                          type: string
+                        target:
+                          $ref: '#/components/schemas/Profile'
+              examples:
+                Example:
+                  value:
+                    success: true
+                    block_list:
+                      - _id: '1830113509669736448'
+                        userID: '1729788214794915840'
+                        targetID: '1818881790329360384'
+                        created_at: 1579307276
+                        reason: Was mean
+                        target:
+                          description: ''
+                          about: 'Whoa! A profile'
+                          tags: []
+                          is_nsfw: false
+                          status: public
+                          theme: '#0a62ac'
+                          cards: []
+                          nickname: null
+                          username: 'Username!'
+                          _id: '1818881790329360384'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
       deprecated: false
-    delete:
-      tags:
-        - chat
-      summary: chat.block_user.delete
-      operationId: chat.block_user.delete
-      parameters: []
-      responses:
-        '200':
-          description: OK
-          headers: {}
-      deprecated: false
+      security:
+        - API key: []
+      description: Requires chat.manage_blocklist.read
     post:
       tags:
         - chat
-      summary: chat.block_user.post
-      operationId: chat.block_user.post
+      summary: Block a user
+      operationId: chat.block_user
       parameters: []
       responses:
         '200':
-          description: OK
+          description: Blocked the users mentioned in the array
           headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIBasicSuccess'
+        '400':
+          description: "Y'all didnt read the request body did you"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
       deprecated: false
+      security:
+        - API key: []
+      description: Requires chat.manage_blocklist.write
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                users:
+                  type: array
+                  description: |
+                    Array of userIDs to block
+                  items: {}
+                reason:
+                  type: string
+              required:
+                - users
+                - reason
   '/v1/chat/@me/block_list/{targetID}':
     delete:
       tags:
         - chat
-      summary: chat.unblock_user
+      summary: Unblock a user
       operationId: chat.unblock_user
       parameters:
         - name: targetID
@@ -1956,50 +2089,57 @@ paths:
             type: string
       responses:
         '200':
-          description: OK
+          description: Unblocked the user
           headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIBasicSuccess'
+        '400':
+          description: The user wasnt blocked before
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
       deprecated: false
-  /v1/chat/@me/privacy_settings:
-    get:
-      tags:
-        - chat
-      summary: chat.get_set_privacy_settings.get
-      operationId: chat.get_set_privacy_settings.get
-      parameters: []
-      responses:
-        '200':
-          description: OK
-          headers: {}
-      deprecated: false
-    post:
-      tags:
-        - chat
-      summary: chat.get_set_privacy_settings.post
-      operationId: chat.get_set_privacy_settings.post
-      parameters: []
-      responses:
-        '200':
-          description: OK
-          headers: {}
-      deprecated: false
+      security:
+        - API key: []
   /v1/permissions/@me/teams:
     get:
-      tags:
-        - perm
-      summary: perm.get_user_teams
-      operationId: perm.get_user_teams
+      summary: Get my teams
+      operationId: teams.list_teams
       parameters: []
       responses:
         '200':
           description: OK
           headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  teams:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TeamMember'
       deprecated: false
+      security:
+        - API key: []
+      description: Requires teams.teams.read
+      tags:
+        - teams
   '/v1/permissions/{creatorID}/team/{userID}':
     delete:
-      tags:
-        - perm
-      summary: perm.manage_user_from_team.delete
-      operationId: perm.manage_user_from_team.delete
+      summary: Leave a team/Remove a user from a team
+      operationId: teams.remove_member
       parameters:
         - name: creatorID
           in: path
@@ -2019,12 +2159,31 @@ paths:
         '200':
           description: OK
           headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIBasicSuccess'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
+        '403':
+          description: You do not have rights to edit this team
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
       deprecated: false
+      security:
+        - API key: []
+      description: Requires teams.teams.write
+      tags:
+        - teams
     post:
-      tags:
-        - perm
-      summary: perm.manage_user_from_team.post
-      operationId: perm.manage_user_from_team.post
+      summary: Edit a team member
+      operationId: teams.edit_member
       parameters:
         - name: creatorID
           in: path
@@ -2044,13 +2203,50 @@ paths:
         '200':
           description: OK
           headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIBasicSuccess'
+        '400':
+          description: The user is not apart of the team.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
+        '404':
+          description: The roleID you provided doesnt exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
       deprecated: false
+      description: |-
+        Requires teams.teams.write
+
+        Update a members roles
+      security:
+        - API key: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                roleID:
+                  type: string
+                  description: The roleID you want to set their permissions to
+      tags:
+        - teams
   '/v1/permissions/{creatorID}/team/accept_invite':
     get:
-      tags:
-        - perm
-      summary: perm.accept_invite_user_to_team
-      operationId: perm.accept_invite_user_to_team
+      summary: Accept a team invite
+      operationId: team.accept_invite
       parameters:
         - name: creatorID
           in: path
@@ -2063,31 +2259,38 @@ paths:
         '200':
           description: OK
           headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIBasicSuccess'
+        '400':
+          description: You have already accepted the invite
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
+        '403':
+          description: You are not invited to this team
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
       deprecated: false
+      tags:
+        - teams
+      security:
+        - API key: []
+      description: Requires teams.teams.write
   '/v1/permissions/@me/team/{userID}/invite':
-    get:
-      tags:
-        - perm
-      summary: perm.invite_user_to_team.get
-      operationId: perm.invite_user_to_team.get
-      parameters:
-        - name: userID
-          in: path
-          description: ''
-          required: true
-          style: simple
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          headers: {}
-      deprecated: false
     post:
-      tags:
-        - perm
-      summary: perm.invite_user_to_team.post
-      operationId: perm.invite_user_to_team.post
+      summary: Invite a user to your team
+      operationId: teams.invite
       parameters:
         - name: userID
           in: path
@@ -2098,39 +2301,135 @@ paths:
             type: string
       responses:
         '200':
-          description: OK
+          description: 'Invited the user to your team, please wait for them to accept the invite!'
           headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIBasicSuccess'
+        '400':
+          description: User has already been invited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
+        '404':
+          description: The user was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
       deprecated: false
+      tags:
+        - teams
+      security:
+        - API key: []
+      description: Requires teams.teams.write
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
+        description: Body will be ignored
   /v1/permissions/@me/team/search:
     get:
-      tags:
-        - perm
-      summary: perm.search_for_users
-      operationId: perm.search_for_users
-      parameters: []
+      summary: Search for new team members
+      operationId: teams.search
+      parameters:
+        - schema:
+            type: string
+            minLength: 2
+            maxLength: 100
+          in: query
+          name: q
+          description: The username to search for
+          required: true
       responses:
         '200':
-          description: OK
+          description: Returns users that can be invited or have been invited already. Check the status field before attempting to invite
           headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: string
+                  users:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                          description: the users ID
+                        username:
+                          type: string
+                          description: The username
+                        status:
+                          type: string
+                          description: 'The status of the user, if they have been invited this will be set to "Pending" otherwise it is "Avalible"'
+        '400':
+          description: 'Something is wrong with the query param. You either didnt set it, or set it too long.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
       deprecated: false
+      tags:
+        - teams
+      security:
+        - API key: []
+      description: Requires teams.teams.read
   /v1/permissions/@me/team:
     get:
       tags:
         - perm
-      summary: perm.manage_creator_team
-      operationId: perm.manage_creator_team
+      summary: Get my team
+      operationId: teams.team
       parameters: []
       responses:
         '200':
           description: OK
           headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: string
+                  members:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TeamMember'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
       deprecated: false
+      description: Requires teams.teams.read
+      security:
+        - API key: []
   '/v1/permissions/@me/roles/{roleID}':
     delete:
-      tags:
-        - perm
-      summary: perm.manage_creator_role.delete
-      operationId: perm.manage_creator_role.delete
+      summary: Delete a role
+      operationId: teams.delete_role
       parameters:
         - name: roleID
           in: path
@@ -2141,14 +2440,38 @@ paths:
             type: string
       responses:
         '200':
-          description: OK
+          description: Deleted the role
           headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIBasicSuccess'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
+        '403':
+          description: You dont have rights to edit this role
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '404':
+          description: Role not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
       deprecated: false
+      security:
+        - API key: []
+      tags:
+        - teams
     post:
-      tags:
-        - perm
-      summary: perm.manage_creator_role.post
-      operationId: perm.manage_creator_role.post
+      summary: Update a team role
+      operationId: teams.edit_role
       parameters:
         - name: roleID
           in: path
@@ -2159,49 +2482,89 @@ paths:
             type: string
       responses:
         '200':
-          description: OK
+          description: Updated this role
           headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIBasicSuccess'
+        '400':
+          description: Input validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
+        '403':
+          description: You dont have rights to edit this role
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
       deprecated: false
+      security:
+        - API key: []
+      description: Requires teams.roles.write
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                permissions:
+                  type: array
+                  items:
+                    type: string
+                color:
+                  type: string
+                title:
+                  type: string
+                description:
+                  type: string
+      tags:
+        - teams
   /v1/permissions/@me/roles:
     get:
       tags:
         - perm
-      summary: perm.manage_creator_roles.get
-      operationId: perm.manage_creator_roles.get
+      summary: "List my team's roles"
+      operationId: teams.list_roles
       parameters: []
       responses:
         '200':
           description: OK
           headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  roles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TeamRole'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
       deprecated: false
+      security:
+        - API key: []
+      description: Requires teams.roles.read
     post:
       tags:
         - perm
       summary: perm.manage_creator_roles.post
       operationId: perm.manage_creator_roles.post
-      parameters: []
-      responses:
-        '200':
-          description: OK
-          headers: {}
-      deprecated: false
-  /v1/permissions/@me/roles/positions:
-    get:
-      tags:
-        - perm
-      summary: perm.manage_role_positions.get
-      operationId: perm.manage_role_positions.get
-      parameters: []
-      responses:
-        '200':
-          description: OK
-          headers: {}
-      deprecated: false
-    post:
-      tags:
-        - perm
-      summary: perm.manage_role_positions.post
-      operationId: perm.manage_role_positions.post
       parameters: []
       responses:
         '200':
@@ -3309,6 +3672,52 @@ components:
         is_unread:
           type: boolean
       description: ''
+    TeamMember:
+      title: TeamMember
+      type: object
+      properties:
+        _id:
+          type: string
+        userID:
+          type: string
+        creatorID:
+          type: string
+        roleID:
+          type: string
+        created_at:
+          type: string
+        status:
+          type: string
+        role:
+          $ref: '#/components/schemas/TeamRole'
+        creator:
+          $ref: '#/components/schemas/BasicUser'
+    TeamRole:
+      title: TeamRole
+      type: object
+      properties:
+        _id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        permissions:
+          type: array
+          description: |
+            An array of active permissions
+          items:
+            type: string
+        url_overrides:
+          type: string
+        color:
+          type: string
+        userID:
+          type: string
+        created_at:
+          type: string
+        position:
+          type: string
   securitySchemes:
     API key:
       type: apiKey
