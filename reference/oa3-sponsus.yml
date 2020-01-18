@@ -550,13 +550,11 @@ paths:
           description: OK
           headers: {}
           content:
-            application/json:
+            application/octet-stream:
               schema:
-                type: object
+                type: string
                 description: OK
-                nullable: true
-        '':
-          description: Returns an image object
+                format: binary
       deprecated: false
     parameters:
       - schema:
@@ -3731,7 +3729,6 @@ security:
   - idk: []
 tags:
   - name: authentication
-  - name: pay
   - name: profile
   - name: oauth
   - name: posts
@@ -3739,17 +3736,12 @@ tags:
   - name: webhooks
   - name: events
   - name: search
-  - name: seo
   - name: integrations
   - name: admin
   - name: feed
-  - name: comm
   - name: chat
   - name: perm
   - name: comments
-  - name: emoji
   - name: notifications
-  - name: redash
-  - name: dev
   - name: payments
     description: ''
