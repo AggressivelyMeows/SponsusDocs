@@ -1,4 +1,4 @@
-#!/use/bin/env bash
+#!/bin/env bash
 
 # First we need to install all the requirements
 npm install -g widdershins
