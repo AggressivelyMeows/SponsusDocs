@@ -2523,8 +2523,6 @@ paths:
         - teams
   /v1/permissions/@me/roles:
     get:
-      tags:
-        - perm
       summary: "List my team's roles"
       operationId: teams.list_roles
       parameters: []
@@ -2553,6 +2551,8 @@ paths:
       security:
         - ApiKeyAuth: []
       description: Requires teams.roles.read
+      tags:
+        - teams
     post:
       tags:
         - perm
@@ -2568,8 +2568,8 @@ paths:
     get:
       tags:
         - comments
-      summary: comments.manage_comment_replies.get
-      operationId: comments.manage_comment_replies.get
+      summary: "Get a comment's replies"
+      operationId: comments.get_replies
       parameters:
         - name: postID
           in: path
@@ -2589,12 +2589,21 @@ paths:
         '200':
           description: OK
           headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  comments:
+                    $ref: '#/components/schemas/Comment'
       deprecated: false
     post:
       tags:
         - comments
-      summary: comments.manage_comment_replies.post
-      operationId: comments.manage_comment_replies.post
+      summary: Reply to a comment
+      operationId: comments.create_reply
       parameters:
         - name: postID
           in: path
@@ -2611,16 +2620,43 @@ paths:
           schema:
             type: string
       responses:
-        '200':
-          description: OK
+        '201':
+          description: Created the reply
           headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIBasicSuccess'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
       deprecated: false
+      description: Requires comments.manage_comments.write
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
   '/v1/comments/{postID}/comment/{commentID}/replies/stats':
     get:
       tags:
         - comments
-      summary: comments.replies_stats.get
-      operationId: comments.replies_stats.get
+      summary: "Get a comment's replies statistics"
+      operationId: comments.get_comment_reply_stats
       parameters:
         - name: postID
           in: path
@@ -2640,89 +2676,29 @@ paths:
         '200':
           description: OK
           headers: {}
-      deprecated: false
-    post:
-      tags:
-        - comments
-      summary: comments.replies_stats.post
-      operationId: comments.replies_stats.post
-      parameters:
-        - name: postID
-          in: path
-          description: ''
-          required: true
-          style: simple
-          schema:
-            type: string
-        - name: commentID
-          in: path
-          description: ''
-          required: true
-          style: simple
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          headers: {}
-      deprecated: false
-  '/v1/comments/{postID}/comment/{commentID}':
-    delete:
-      tags:
-        - comments
-      summary: comments.manage_comment.delete
-      operationId: comments.manage_comment.delete
-      parameters:
-        - name: postID
-          in: path
-          description: ''
-          required: true
-          style: simple
-          schema:
-            type: string
-        - name: commentID
-          in: path
-          description: ''
-          required: true
-          style: simple
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          headers: {}
-      deprecated: false
-    post:
-      tags:
-        - comments
-      summary: comments.manage_comment.post
-      operationId: comments.manage_comment.post
-      parameters:
-        - name: postID
-          in: path
-          description: ''
-          required: true
-          style: simple
-          schema:
-            type: string
-        - name: commentID
-          in: path
-          description: ''
-          required: true
-          style: simple
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  total:
+                    type: number
+                    description: Total replies to this comment
+        '404':
+          description: The post was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
       deprecated: false
   '/v1/comments/{postID}':
     get:
       tags:
         - comments
-      summary: comments.manage_comments.get
-      operationId: comments.manage_comments.get
+      summary: "List a post's comments"
+      operationId: posts.list_comments
       parameters:
         - name: postID
           in: path
@@ -2735,12 +2711,32 @@ paths:
         '200':
           description: OK
           headers: {}
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: string
+                  comments:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Comment'
+        '404':
+          description: Post was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
       deprecated: false
+      security:
+        - ApiKeyAuth: []
+      description: Requires comments.manage_comments.read
     post:
       tags:
         - comments
-      summary: comments.manage_comments.post
-      operationId: comments.manage_comments.post
+      summary: Create a comment
+      operationId: posts.create_comment
       parameters:
         - name: postID
           in: path
@@ -2750,71 +2746,46 @@ paths:
           schema:
             type: string
       responses:
-        '200':
-          description: OK
-          headers: {}
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIBasicSuccess'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
       deprecated: false
-  /v1/notifications/@me/auth:
-    get:
-      tags:
-        - notifications
-      summary: notifications.set_user_key
-      operationId: notifications.set_user_key
-      parameters: []
-      responses:
-        '200':
-          description: OK
-          headers: {}
-      deprecated: false
-  '/v1/notifications/{notifID}/read':
-    post:
-      tags:
-        - notifications
-      summary: notifications.set_read
-      operationId: notifications.set_read
-      parameters:
-        - name: notifID
-          in: path
-          description: ''
-          required: true
-          style: simple
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          headers: {}
-      deprecated: false
-  /v1/notifications/@me:
-    get:
-      tags:
-        - notifications
-      summary: notifications.get_notifications
-      operationId: notifications.get_notifications
-      parameters: []
-      responses:
-        '200':
-          description: OK
-          headers: {}
-      deprecated: false
-  /v1/notifications/@me/unread_count:
-    get:
-      tags:
-        - notifications
-      summary: notifications.get_recent_notifs
-      operationId: notifications.get_recent_notifs
-      parameters: []
-      responses:
-        '200':
-          description: OK
-          headers: {}
-      deprecated: false
+      description: Requires comments.manage_comments.write
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  minLength: 5
+                  maxLength: 500
   /v1/payments/@me/statistics:
     get:
       tags:
         - payments
-      summary: payments.payment_stats
-      description: Get the monthly stats for the user.
+      summary: Get my monthly stats
+      description: |-
+        Requires payments.stats.read
+        Get the monthly stats for the user.
       operationId: payments.payment_stats
       parameters: []
       responses:
@@ -2831,6 +2802,13 @@ paths:
                 sponsorships: 1
                 due: 1
                 sponsoring: 1
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
+              examples: {}
         '403':
           description: Forbidden
           content:
@@ -2838,11 +2816,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/APIError'
       deprecated: false
+      security:
+        - ApiKeyAuth: []
   '/v1/payments/{userID}/tiers':
     get:
       tags:
         - payments
-      summary: payments.get_user_tiers
+      summary: Get a creators tiers
       description: 'Gets the creators tiers for display on the front end. If you want to edit tiers, use /payments/@me/tiers.'
       operationId: payments.get_user_tiers
       parameters:
@@ -2887,7 +2867,7 @@ paths:
     get:
       tags:
         - payments
-      summary: payments.get_tier.get
+      summary: Get a single tier
       description: Get a single tier
       operationId: payments.get_tier.get
       parameters:
@@ -2924,7 +2904,7 @@ paths:
     get:
       tags:
         - payments
-      summary: payments.get_tier
+      summary: "Get a tier's remaining slots (if its a limited tier)"
       description: Tells you how many slots are open for sponsorships. Used in the UI to show how many are left.
       operationId: payments.get_tier
       parameters:
@@ -2970,7 +2950,7 @@ paths:
     get:
       tags:
         - payments
-      summary: payments.get_user_supporting
+      summary: List who I am supporting
       description: Requires payments.sponsoring.read
       operationId: payments.get_user_supporting
       parameters: []
@@ -2987,13 +2967,14 @@ paths:
     get:
       tags:
         - payments
-      summary: Check sponsorship
+      summary: Check if a user is sponsoring you
       description: |-
         Gets an IncomingSponsorship object if the target user is sponsoring you.
 
         Requires payments.sponsorships.read
+
         **(Sponsorships and sponsoring are two different permissions!!)**
-      operationId: payments.get_user_sponsoring_status
+      operationId: payments.user_sponsoring_status
       parameters:
         - name: userID
           in: path
@@ -3035,6 +3016,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/APIError'
       deprecated: false
+      security:
+        - ApiKeyAuth: []
   '/v1/payments/{userID}/donations/settings':
     get:
       tags:
@@ -3094,6 +3077,127 @@ paths:
               schema:
                 $ref: '#/components/schemas/APIKeyNoPermissions'
       deprecated: false
+  '/v1/comments/{postID}/comment/{commentID}':
+    delete:
+      tags:
+        - comments
+      summary: Delete a comment
+      operationId: comments.manage_comment.delete
+      parameters:
+        - name: postID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+        - name: commentID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Deleted the comment
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIBasicSuccess'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
+        '403':
+          description: You dont have rights to edit this comment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+      deprecated: false
+      description: Requires comments.manage_comments.write
+      security:
+        - ApiKeyAuth: []
+    post:
+      tags:
+        - comments
+      summary: Edit a comment
+      operationId: comments.manage_comment.post
+      parameters:
+        - name: postID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+        - name: commentID
+          in: path
+          description: ''
+          required: true
+          style: simple
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Updated the comment
+          headers: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIBasicSuccess'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIKeyNoPermissions'
+        '403':
+          description: You dont have rights to edit this comment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIError'
+      deprecated: false
+      security:
+        - ApiKeyAuth: []
+      description: Requires comments.manage_comments.write
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
 components:
   schemas:
     Profile:
@@ -3706,12 +3810,38 @@ components:
         color:
           type: string
         userID:
-
           type: string
         created_at:
           type: string
         position:
           type: string
+    Comment:
+      title: Comment
+      type: object
+      properties:
+        _id:
+          type: string
+          description: The id of the comment
+        message:
+          type: string
+        userID:
+          type: string
+        postID:
+          type: string
+        created_at:
+          type: number
+        is_reply:
+          type: boolean
+        user:
+          $ref: '#/components/schemas/BasicUser'
+        can_manage:
+          type: boolean
+        can_edit:
+          type: boolean
+        is_creator:
+          type: boolean
+        is_staff:
+          type: boolean
   securitySchemes:
     ApiKeyAuth:
       type: apiKey
@@ -3722,20 +3852,16 @@ components:
       name: Authorization
       in: header
 tags:
-  - name: authentication
   - name: profile
-  - name: oauth
   - name: posts
+  - name: payments
+  - name: oauth
   - name: files
-  - name: webhooks
   - name: events
   - name: search
   - name: integrations
-  - name: admin
   - name: feed
   - name: chat
-  - name: perm
   - name: comments
   - name: notifications
-  - name: payments
     description: ''
